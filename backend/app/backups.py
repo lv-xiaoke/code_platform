@@ -10,9 +10,11 @@ from uuid import uuid4
 import zipfile
 
 from .db import SCHEMA_VERSION
+from . import __version__
 from .runtime import RuntimeLock
 
 COUNT_TABLES = ('problems', 'catalog_entries', 'notes', 'practice_logs', 'study_state', 'source_datasets')
+SUPPORTED_SCHEMAS = ('0001', '0002')
 
 
 def digest(path):
@@ -25,8 +27,9 @@ def inspect_database(path):
         if conn.execute('PRAGMA quick_check').fetchone()[0] != 'ok': raise ValueError('数据库完整性校验失败')
         if conn.execute('PRAGMA foreign_key_check').fetchone(): raise ValueError('数据库外键校验失败')
         row = conn.execute('SELECT version_num FROM alembic_version').fetchone()
-        if not row or row[0] != SCHEMA_VERSION: raise ValueError('备份数据库结构版本不兼容')
-        counts = {name:conn.execute(f'SELECT count(*) FROM {name}').fetchone()[0] for name in COUNT_TABLES}
+        if not row or row[0] not in SUPPORTED_SCHEMAS: raise ValueError('备份数据库结构版本不兼容')
+        tables = COUNT_TABLES + (('problem_test_suites', 'code_runs') if row[0]=='0002' else ())
+        counts = {name:conn.execute(f'SELECT count(*) FROM {name}').fetchone()[0] for name in tables}
         sources = {row[0] for row in conn.execute('SELECT sha256 FROM source_datasets UNION SELECT sha256 FROM import_previews')}
     return counts, sources
 
@@ -50,7 +53,8 @@ def create_backup(db, reason='manual'):
     with closing(sqlite3.connect(snapshot)) as conn:
         conn.row_factory = sqlite3.Row
         datasets = [dict(r) for r in conn.execute('SELECT * FROM source_datasets')]
-    manifest = {'app_version':'1.0.0', 'schema_version':SCHEMA_VERSION, 'created_at':stamp, 'reason':reason,
+        snapshot_schema = conn.execute('SELECT version_num FROM alembic_version').fetchone()[0]
+    manifest = {'app_version':__version__, 'schema_version':snapshot_schema, 'created_at':stamp, 'reason':reason,
                 'counts':counts, 'datasets':datasets, 'files':{name:digest(path) for name,path in files.items()}}
     # Publish the archive only after all snapshots and hashes are available.
     partial = stage / filename
@@ -80,7 +84,7 @@ def _restore(archive_path, data_dir):
                 path = PurePosixPath(info.filename)
                 if path.is_absolute() or '..' in path.parts or '\\' in info.filename or ':' in info.filename or stat.S_ISLNK(info.external_attr >> 16): raise ValueError('备份包含不安全路径')
             manifest = json.loads(archive.read('manifest.json'))
-            if manifest.get('schema_version') != SCHEMA_VERSION: raise ValueError('备份结构版本不兼容')
+            if manifest.get('schema_version') not in SUPPORTED_SCHEMAS: raise ValueError('备份结构版本不兼容')
             files = manifest['files']
             if set(names) != {'manifest.json', *files}: raise ValueError('备份内容与清单不一致')
             if 'study.sqlite3' not in files: raise ValueError('备份缺少数据库')
@@ -92,6 +96,9 @@ def _restore(archive_path, data_dir):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(raw)
         counts, sources = inspect_database(stage / 'study.sqlite3')
+        with closing(sqlite3.connect(stage/'study.sqlite3')) as check:
+            if check.execute('SELECT version_num FROM alembic_version').fetchone()[0] != manifest['schema_version']:
+                raise ValueError('备份清单与实际结构版本不一致')
         if counts != manifest['counts']: raise ValueError('数据库记录数量与清单不一致')
         for sha in sources:
             if f'sources/{sha}' not in files or files[f'sources/{sha}'] != sha: raise ValueError('备份缺少原始来源文件或来源哈希错误')

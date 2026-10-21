@@ -1,0 +1,407 @@
+{
+  "image_ref": "python@sha256:2259debdc6af85626058a15a7bf44ad6a68b8c98c9ae82a02cf5cdb92f096d47",
+  "references": [
+    {
+      "source_record_id": "1681",
+      "display_id": "3",
+      "source_sha256": "4e01c6fd9adfc5e61a41960cfc1e56480368540cc3bc4ce5b6d3a7bd20a067e0",
+      "tests_passed": 4,
+      "python_version": "3.12.15",
+      "cases_sha256": "1957f67ae270f07a799b2a551a712e77d0e09398bfe82877955b85e5a2cf941f"
+    },
+    {
+      "source_record_id": "1538",
+      "display_id": "146",
+      "source_sha256": "39ebcfe23ebc9f3d2f455bef6d85032022e4be4581231d206bb447f04632b505",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "9b608966fb07a53d9414bec45e68df3ece0b0e54d80550e283727e543cd39636"
+    },
+    {
+      "source_record_id": "1478",
+      "display_id": "206",
+      "source_sha256": "553a38a97014de1e69d98a824fd360200cb089099e88a041ca70c3e262e96eba",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "bd316733a17e55a5a13eb7dc0bea375fcd0397cffa6ba5ad74b264ef30bfc3a5"
+    },
+    {
+      "source_record_id": "1469",
+      "display_id": "215",
+      "source_sha256": "b88eeb5161e7822c2934237bac290957a1bdd6fbc941a0e8ebd70a8f42efa63c",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "e4502fbffe84dce7f5f3fd8c4bf8ecb08ee35cc4f7c46368d7f51325930e6acc"
+    },
+    {
+      "source_record_id": "1659",
+      "display_id": "25",
+      "source_sha256": "2a6e69123b17f5b8cac1dd8031549c5b15672cc207a75c6b3239260a2ed09690",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "67a256498e1e89faf9e54eda619c616d52f4e8c2264b13842fbea4f5bbfc4fe1"
+    },
+    {
+      "source_record_id": "1669",
+      "display_id": "15",
+      "source_sha256": "3fb2330d37b2dee9f7650c9d40bf699539d26c406aa3b7784b68ca0f35b8bae3",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "ee68293e27b8ce55c212bda2450fc07207c821697071185810e80fead9347c7b"
+    },
+    {
+      "source_record_id": "1631",
+      "display_id": "53",
+      "source_sha256": "56d4aecf5696dcd413c6ca50527c7098d1a68772aba9fb858a0fca0a362497b8",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "7f8b208f4b2417eb665a8bcc4ce8d10f0896e34160c167fae5052887022f3442"
+    },
+    {
+      "source_record_id": "1906",
+      "display_id": "补充题4",
+      "source_sha256": "cda0bb063f4dad15a281f84a8a602a7cf86d93c0f66439142c6413df83078faa",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "8b63907e16cbeb5cbc1e1a1bfed62ceafb1906a06a853021d00215a9a5a9ce3a"
+    },
+    {
+      "source_record_id": "1679",
+      "display_id": "5",
+      "source_sha256": "b19c76052af64510f5b3a74e08e60c8a88114586fec96c25a0a6ff34b376162c",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "8fb7e8ed510e0a4b3d8d65174937eff1892e32fa2615fd479c04ba6363e69495"
+    },
+    {
+      "source_record_id": "1663",
+      "display_id": "21",
+      "source_sha256": "b4805231b207a1300ac7ee6548ac0475e3352f04b7d6da3748be09ffdb31f36f",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "22306ded25cd8fe029db5da780f4a24131edcf7f85f4c92f2772ab8a6062a0aa"
+    },
+    {
+      "source_record_id": "1582",
+      "display_id": "102",
+      "source_sha256": "c49cc9289b65e82d1a640765e9d632a7dce6c5e2933a3ce9eb007b9157103e83",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "5c88b90f89fc92bf96e7ccf27d54a52b1e390e0b95afc5df2aa1fdb0d9ea7ce5"
+    },
+    {
+      "source_record_id": "1484",
+      "display_id": "200",
+      "source_sha256": "7450052a22ace22605e4a6027d4408b679c1fc385ee022b3fd2bc411a2d109ac",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "c475ed51e6b1d4c0d4079732f54071c9e204d0ad4197b980184067e8b7f68212"
+    },
+    {
+      "source_record_id": "1651",
+      "display_id": "33",
+      "source_sha256": "67c9515e40beb40a082d451edb6123445336f1fb433c5946bb59a51416f22361",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "510d64299cff6a7bcfb4d1f393655c1be390bbbd94885b6c4999c372e29e69f9"
+    },
+    {
+      "source_record_id": "1683",
+      "display_id": "1",
+      "source_sha256": "ace14c57ebe73b6b4aa32b0a6fcb92daaafa19f18d984ff583eb404729d27e2d",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "5849a4a2c48a3d753abf2960f4cf2062d4062d92425314a077505d2150001f67"
+    },
+    {
+      "source_record_id": "1638",
+      "display_id": "46",
+      "source_sha256": "2dd757a1e707627022fb4f44ab959fb2ac50d3aa3c3725e6a6597b7b030b690b",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "07e46443b5f866e003e1be0b88ec777f346aef604995ce13c4a711df752aa0fa"
+    },
+    {
+      "source_record_id": "1664",
+      "display_id": "20",
+      "source_sha256": "6a291fa48accb90197ba4e9190aaca633d0c29925008c78c6688758ea6ff2f1e",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "89bafd8e12429e3ec47757ad3f04a2210fc81308127fc74937c02f18508d5440"
+    },
+    {
+      "source_record_id": "1596",
+      "display_id": "88",
+      "source_sha256": "b747c42edf53a9ae86054a2b7718818d4b4e1bcb93f1bc2a3ec7c025aa6d5eb0",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "92d92fdfa2e321a1402a2df49684d65ddb2b6dfc522f5b888c49174cfd67926a"
+    },
+    {
+      "source_record_id": "1563",
+      "display_id": "121",
+      "source_sha256": "c448eca48f0b2f6b73fc090fd8f17712b67ad80507bd9e7f047214e22a01104e",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "e33245c867492ce9d1631c060489dd16d67d6c2d492d3e681bf3d692d046fbbf"
+    },
+    {
+      "source_record_id": "1592",
+      "display_id": "92",
+      "source_sha256": "d212f2fb60b1622ac2524a185ed976deeacc800abdbc69438529d73df74259b5",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "162cdff0d6cb2c7b4ff9c450ac7c07281c96907208472b315f28056b76b3005a"
+    },
+    {
+      "source_record_id": "1384",
+      "display_id": "300",
+      "source_sha256": "7f781b5b99d2cee31732d94957cb0f1682e5225c59451ea69a2be813aa045dca",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "091c56d91cc86a83e14b530920a6a9de6f769e44623d17c5a3504a453e3d5a51"
+    },
+    {
+      "source_record_id": "1581",
+      "display_id": "103",
+      "source_sha256": "6791f5f30592c3b0125869f2bbdf13ce712146055469771872baa95e602f97f7",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "00fb1b816009ca8683a49c539d5f347f925ab9cee54bcb1feb81c779aa035be2"
+    },
+    {
+      "source_record_id": "1448",
+      "display_id": "236",
+      "source_sha256": "d12e08ba0dca5af1e3cd8f95a72b7054dec5446729ac3789ac2c08a111ea79f4",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "5ee65933287e2bbfebff99a0d25fb960014f1af39f7344f1c836da03274c0cd9"
+    },
+    {
+      "source_record_id": "1661",
+      "display_id": "23",
+      "source_sha256": "f397759431b0edc234e8aa5d827f5ef0bbcf7a1e207c5aa7d38a80677f4accb5",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "25d96f81573764fc9099a6629561adb33ca3b4106a4f13f06716a8210270fcae"
+    },
+    {
+      "source_record_id": "1630",
+      "display_id": "54",
+      "source_sha256": "6b9011ecd03bc38d613e71f4c6a5c1ce92debd4d51e7066bc86d599f5cda3c9e",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "d724e1f6f5c034e800f4ba448f269e16b814a7073c2ddabe9420ab22ca364cf1"
+    },
+    {
+      "source_record_id": "1541",
+      "display_id": "143",
+      "source_sha256": "aa5560e476bac0fe790db6dd1845072149acf313d374d21fd234b7407e1f1148",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "7df456124c58d3df5c3ca08a4ed74a0f7ee47cb13639f08e7790d73f50605d48"
+    },
+    {
+      "source_record_id": "1543",
+      "display_id": "141",
+      "source_sha256": "79cf6abd4af60e065461e425d1445978dabf6bfb0118dccfea6b912eee99a000",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "3e59c963652570272ac4119cc1e58b8cb2b917f11d350026d23606ed64c1d723"
+    },
+    {
+      "source_record_id": "1269",
+      "display_id": "415",
+      "source_sha256": "d0da0d1262952ed4e5d5f14dc86fa0eb0534adb6120e42fdd9acac2dc813e4cc",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "7b203645d71854a52e36c59daf75f338c5f3f28b1d5bb8b87c84e9c9763cf476"
+    },
+    {
+      "source_record_id": "1628",
+      "display_id": "56",
+      "source_sha256": "cc0def308fc2825f3579c36e5b4e89961ef767b073e2378c4c003322fd835b91",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "d6218c2142442cbb19bb16e464d4f29c4d1dec248f1096bb736cf1c40bf9b149"
+    },
+    {
+      "source_record_id": "1612",
+      "display_id": "72",
+      "source_sha256": "f3f2f5195e5dd5524f1e1c82148aaae4815b24a2eddb6b642f8c35c6cc7cb3bd",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "a8bad51b6696364288b807bb4748db540c9ef6c89957520b0cc02b8cef276e12"
+    },
+    {
+      "source_record_id": "1524",
+      "display_id": "160",
+      "source_sha256": "3f6690b82036f1124b14e6fa1097bd60a4623e1d885b056601536906fd649dfe",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "8e18fb889a1bdb126fedfa6f8b429f9d524c8798a8701e8ae5c3c3b0b5372f8e"
+    },
+    {
+      "source_record_id": "1642",
+      "display_id": "42",
+      "source_sha256": "4a739ecda60a2f44cbcd868d873d34435496874e224b6c2c14c8942618647405",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "78ae0b93f05f17a4c0a4f07c16be39877b0a9e04830c65b4f8b8252cd715cf0b"
+    },
+    {
+      "source_record_id": "485",
+      "display_id": "1143",
+      "source_sha256": "6d8d0db5af213dd785202939255e340cbb62b8777df70f46493494e22048645b",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "39b9fcb732a792a1f3174b66608112c4e1ec3ff5cd58131daf0c063ad7f63520"
+    },
+    {
+      "source_record_id": "1602",
+      "display_id": "82",
+      "source_sha256": "1f9cf6446b1473ca9325a940e8b79e6458c6c1858cddc156f4140423501b2e55",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "94ac925d2beeb44cc8f91ceb5dc9c4a363a9a29049b5d0383fd7d0bf1657c30f"
+    },
+    {
+      "source_record_id": "1591",
+      "display_id": "93",
+      "source_sha256": "d0dce19d8b53b568b4ae07bd95daf964ca3d61084f4a0d5bf2ff249aecfc1e19",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "6d2a84e4c6807f4193089d6da6e00016a1de720326252ef880da0a021b76bed0"
+    },
+    {
+      "source_record_id": "1560",
+      "display_id": "124",
+      "source_sha256": "3286d14478df1159071f79ec5d0b59c4932f71a17e3edf4a403053f17abd1828",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "ed485a16b819cb75af462fc4503c583bba6fb4f3c6f2e7bdafae1969e4cf0054"
+    },
+    {
+      "source_record_id": "1665",
+      "display_id": "19",
+      "source_sha256": "1894894419faf6ae4f15fe8403980814e63b81a69b606c7a44775ea0e40ae482",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "f35bacf0d59a955b7e36fbd1f92c27d761feb95b277883db00115a1ba0e47ed3"
+    },
+    {
+      "source_record_id": "1680",
+      "display_id": "4",
+      "source_sha256": "d5a2f5cda0937e91d1db9a5af0b4eeb30a74cbfeb2c4c94f90965fc93f37beda",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "ba50cef8d198a3c51cc8db70000775c17126d12277e8c7f851be76d2cd549a94"
+    },
+    {
+      "source_record_id": "1542",
+      "display_id": "142",
+      "source_sha256": "b8742ad10516a74850a2260218151f9ede09fa952672c2072650984396488b37",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "41c3c3f41c5c299928e38191f69bdfbadaf46320261abed3e2298376d7bd15da"
+    },
+    {
+      "source_record_id": "1519",
+      "display_id": "165",
+      "source_sha256": "2d2db6136e724da7cbf6eaa8055927e0f9be9fb8eb6e798d63aacf6d1aa957d8",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "c50a516d30713d1244e5a7cc694b93b6ca3c41f4e6bfe8707180f087466b0d01"
+    },
+    {
+      "source_record_id": "1485",
+      "display_id": "199",
+      "source_sha256": "6b6843f269d960ba817d6cfa216f201ab533f9116af9692d297e56a8a3cee8d5",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "8b1d67cb29e6b8cfa9707fdab6cb6359c71fe1e99bc82f45b7cf6da868744d54"
+    },
+    {
+      "source_record_id": "1445",
+      "display_id": "239",
+      "source_sha256": "7e0e3548b7a309116a235193980957bf3e9936314ff0c8f093e16c7d6db8ebe3",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "02c9ad190d62c879aaf80ab790081bf8fb8051eb2fd33fe2cb86b3098f315f64"
+    },
+    {
+      "source_record_id": "1662",
+      "display_id": "22",
+      "source_sha256": "2f4eb9c4e82a4ded5d750f75f11278d18ecd46e2dea5f7d8997dbbadde0046cc",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "04520f71996d8b73555ad39e835ad43fd44dab9e13c817e3c5411cc3f30db797"
+    },
+    {
+      "source_record_id": "925",
+      "display_id": "704",
+      "source_sha256": "e1a8090c6604192a6f83544c6800edc8ec61df2228e88dcc690f594b7a8986fa",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "044a25be85d6888dea725362fe36ffc48420a02b7c0a04ea1c306b63f2719da8"
+    },
+    {
+      "source_record_id": "1652",
+      "display_id": "32",
+      "source_sha256": "46f7c164088c250707cb3d8e0bf670b046c5caa9615424957b12844ef7d5aded",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "1e1d569dfe8f20710fcceacfbf543fafeec441894242352f394feb48759e0ea6"
+    },
+    {
+      "source_record_id": "1615",
+      "display_id": "69",
+      "source_sha256": "1da4beda8b723c4c0527a710e3b468de3fb53ebe3f70e971472da7f762592b99",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "26ddedd9db49b8a6374959547c0e0c1769dff33322bcf0d3b6a37d7daf126ead"
+    },
+    {
+      "source_record_id": "1536",
+      "display_id": "148",
+      "source_sha256": "6cd457137dc2878b247313ec4ba781ce61327afdf5cf35aca74b37f3ee854a39",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "ebe6c3899883e91f3c9fca5f1bbc447cfeb61a543d3ecc08b07d084b2f1867ac"
+    },
+    {
+      "source_record_id": "1590",
+      "display_id": "94",
+      "source_sha256": "3c29573071435c303d57411a361ffa1ec4b5c7ce7e0de8e97f1c655d53843ae2",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "daac8df3e21e363ab6bc944acdbc8a6e4ad65da91b5adac9faee4d8f360c76b6"
+    },
+    {
+      "source_record_id": "1452",
+      "display_id": "232",
+      "source_sha256": "02c3f2b61e203d6c97017e22caceee57134ec83bb8c92c7df006f7d511652b09",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "a30c83eabc69738ec705e7f6e3cbfbac759acad90328ed37c0531928ea6d26d3"
+    },
+    {
+      "source_record_id": "1653",
+      "display_id": "31",
+      "source_sha256": "3485f803c5be5c9f053df8e5b022ac865f45d835b99f593dabe4f53f3f83f1f2",
+      "tests_passed": 3,
+      "python_version": "3.12.15",
+      "cases_sha256": "ce708a110acc38e815761a29c93f72627c95d5d09c761b08326ea159a8a52428"
+    },
+    {
+      "source_record_id": "1608",
+      "display_id": "76",
+      "source_sha256": "4a99ee452c7757ed208a1b530a3b302616def398558f6bc7c5e13867a997144e",
+      "tests_passed": 4,
+      "python_version": "3.12.15",
+      "cases_sha256": "2882545f8e8743954bd164e0fb245a4b748ce8fee2cbade30ad6a1e74c9db345"
+    }
+  ],
+  "verified_at": "2026-10-21",
+  "total_test_cases": 152
+}

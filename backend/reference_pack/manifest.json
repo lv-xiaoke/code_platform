@@ -1,0 +1,1720 @@
+{
+  "version": "2026-10-21-v1",
+  "attribution": "Original local learning references, not official solutions.",
+  "problems": [
+    {
+      "source_record_id": "1681",
+      "display_id": "3",
+      "title": "无重复字符的最长子串",
+      "file": "codetop_1681.py",
+      "input_description": "一行字符串 s，允许空行；行结束符不属于字符串。",
+      "output_description": "输出最长无重复子串的长度。",
+      "explanation": "滑动窗口记录字符上次出现的位置，重复时推进左边界。",
+      "complexity": "时间 O(n)，空间 O(字符集大小)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1681:0",
+          "name": "样例 / 边界 1",
+          "stdin": "abcabcbb\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1681:1",
+          "name": "样例 / 边界 2",
+          "stdin": "bbbbb\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1681:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1681:3",
+          "name": "样例 / 边界 4",
+          "stdin": "你好你世\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1538",
+      "display_id": "146",
+      "title": "LRU缓存机制",
+      "file": "codetop_1538.py",
+      "input_description": "第一行 capacity q，随后 q 行 put key value 或 get key；capacity>=1。",
+      "output_description": "每次 get 输出对应值，未找到输出 -1。",
+      "explanation": "OrderedDict 维护访问次序，访问移至末尾，超容量淘汰最早项。",
+      "complexity": "每个操作均摊 O(1)，空间 O(capacity)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1538:0",
+          "name": "样例 / 边界 1",
+          "stdin": "2 8\nput 1 1\nput 2 2\nget 1\nput 3 3\nget 2\nput 4 4\nget 1\nget 4\n",
+          "expected_stdout": "1\n-1\n-1\n4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1538:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 4\nput 1 7\nput 1 8\nget 1\nget 2\n",
+          "expected_stdout": "8\n-1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1538:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1 0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1478",
+      "display_id": "206",
+      "title": "反转链表",
+      "file": "codetop_1478.py",
+      "input_description": "第一行 n，随后 n 个整数表示链表节点值；n=0 表示空链表。",
+      "output_description": "输出反转后节点值，以空格分隔；空链表输出空行。",
+      "explanation": "迭代改变 next 指针，同时保留原后继。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1478:0",
+          "name": "样例 / 边界 1",
+          "stdin": "5\n1 2 3 4 5\n",
+          "expected_stdout": "5 4 3 2 1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1478:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n7\n",
+          "expected_stdout": "7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1478:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1469",
+      "display_id": "215",
+      "title": "数组中的第K个最大元素",
+      "file": "codetop_1469.py",
+      "input_description": "第一行 n k，随后 n 个整数；1<=k<=n。",
+      "output_description": "输出第 k 大元素（保留重复计数）。",
+      "explanation": "维护容量为 k 的最小堆，堆顶就是当前第 k 大元素。",
+      "complexity": "时间 O(n log k)，空间 O(k)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1469:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6 2\n3 2 1 5 6 4\n",
+          "expected_stdout": "5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1469:1",
+          "name": "样例 / 边界 2",
+          "stdin": "9 4\n3 2 3 1 2 4 5 5 6\n",
+          "expected_stdout": "4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1469:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1 1\n-9\n",
+          "expected_stdout": "-9",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1659",
+      "display_id": "25",
+      "title": "K 个一组翻转链表",
+      "file": "codetop_1659.py",
+      "input_description": "第一行 n k，随后 n 个节点值；k>=1。",
+      "output_description": "每 k 个节点反转，不足 k 个保留；输出节点值。",
+      "explanation": "找到每组尾节点后原地反转该组，使用哑节点连接前后段。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1659:0",
+          "name": "样例 / 边界 1",
+          "stdin": "5 2\n1 2 3 4 5\n",
+          "expected_stdout": "2 1 4 3 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1659:1",
+          "name": "样例 / 边界 2",
+          "stdin": "5 3\n1 2 3 4 5\n",
+          "expected_stdout": "3 2 1 4 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1659:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 1\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1669",
+      "display_id": "15",
+      "title": "三数之和",
+      "file": "codetop_1669.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。",
+      "output_description": "每行一个和为 0 的三元组，组内升序，无重复；行序不限，无解输出空行。",
+      "explanation": "排序后枚举首项并用双指针寻找另外两项，跳过重复值。",
+      "complexity": "时间 O(n²)，排序与结果存储另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1669:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6\n-1 0 1 2 -1 -4\n",
+          "expected_stdout": "-1 -1 2\n-1 0 1",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1669:1",
+          "name": "样例 / 边界 2",
+          "stdin": "4\n0 0 0 0\n",
+          "expected_stdout": "0 0 0",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1669:2",
+          "name": "样例 / 边界 3",
+          "stdin": "3\n1 2 3\n",
+          "expected_stdout": "",
+          "comparison": "unordered_lines"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1631",
+      "display_id": "53",
+      "title": "最大子数组和",
+      "file": "codetop_1631.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。 n>=1。",
+      "output_description": "输出非空连续子数组的最大和。",
+      "explanation": "Kadane：维护必须以当前位置结束的最大和，再更新全局答案。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1631:0",
+          "name": "样例 / 边界 1",
+          "stdin": "9\n-2 1 -3 4 -1 2 1 -5 4\n",
+          "expected_stdout": "6",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1631:1",
+          "name": "样例 / 边界 2",
+          "stdin": "3\n-5 -2 -7\n",
+          "expected_stdout": "-2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1631:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1\n9\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1906",
+      "display_id": "补充题4",
+      "title": "手撕快速排序",
+      "file": "codetop_1906.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。",
+      "output_description": "输出升序排序后的数组，空格分隔。",
+      "explanation": "显式栈维护区间，用三路划分把小于、等于、大于基准的元素分开。",
+      "complexity": "平均时间 O(n log n)，最坏 O(n²)；显式区间栈。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1906:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6\n5 1 1 2 0 0\n",
+          "expected_stdout": "0 0 1 1 2 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1906:1",
+          "name": "样例 / 边界 2",
+          "stdin": "4\n-3 0 8 -3\n",
+          "expected_stdout": "-3 -3 0 8",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1906:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1679",
+      "display_id": "5",
+      "title": "最长回文子串",
+      "file": "codetop_1679.py",
+      "input_description": "一行字符串，允许空行。",
+      "output_description": "输出最长回文子串；等长时输出起点最靠左者。",
+      "explanation": "从奇数与偶数中心向两侧扩展，只在长度更大时替换答案。",
+      "complexity": "时间 O(n²)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1679:0",
+          "name": "样例 / 边界 1",
+          "stdin": "babad\n",
+          "expected_stdout": "bab",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1679:1",
+          "name": "样例 / 边界 2",
+          "stdin": "cbbd\n",
+          "expected_stdout": "bb",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1679:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1663",
+      "display_id": "21",
+      "title": "合并两个有序链表",
+      "file": "codetop_1663.py",
+      "input_description": "先输入链表 A 的长度及节点值，再输入链表 B 的长度及节点值；两者均升序。",
+      "output_description": "输出合并后的升序链表。",
+      "explanation": "使用哑节点，用双指针依次连接较小节点。",
+      "complexity": "时间 O(n+m)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1663:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3\n1 2 4\n3\n1 3 4\n",
+          "expected_stdout": "1 1 2 3 4 4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1663:1",
+          "name": "样例 / 边界 2",
+          "stdin": "0\n1\n0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1663:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1582",
+      "display_id": "102",
+      "title": "二叉树的层序遍历",
+      "file": "codetop_1582.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。",
+      "output_description": "每层输出一行，层内由左至右；空树不输出内容。",
+      "explanation": "队列按当前层长度分批弹出，并把子节点加入下一层。",
+      "complexity": "时间 O(n)，空间 O(树的最大宽度)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1582:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7\n3 9 20 null null 15 7\n",
+          "expected_stdout": "3\n9 20\n15 7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1582:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n1\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1582:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1484",
+      "display_id": "200",
+      "title": "岛屿数量",
+      "file": "codetop_1484.py",
+      "input_description": "第一行 m n，接着 m 行长度 n 的 0/1 字符串，行内不加空格。",
+      "output_description": "输出上下左右相连的陆地块数。",
+      "explanation": "遍历陆地，用显式栈淹没同一连通块，避免递归深度限制。",
+      "complexity": "时间 O(mn)，空间 O(mn)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1484:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4 5\n11000\n11000\n00100\n00011\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1484:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 1\n0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1484:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1 1\n1\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1651",
+      "display_id": "33",
+      "title": "搜索旋转排序数组",
+      "file": "codetop_1651.py",
+      "input_description": "第一行 n target，随后 n 个不同整数，是升序数组旋转后的结果。",
+      "output_description": "输出 target 的从 0 开始的下标，不存在输出 -1。",
+      "explanation": "二分判断左右哪一半有序，再判断目标是否位于该范围。",
+      "complexity": "时间 O(log n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1651:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7 0\n4 5 6 7 0 1 2\n",
+          "expected_stdout": "4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1651:1",
+          "name": "样例 / 边界 2",
+          "stdin": "7 3\n4 5 6 7 0 1 2\n",
+          "expected_stdout": "-1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1651:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1 1\n1\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1683",
+      "display_id": "1",
+      "title": "两数之和",
+      "file": "codetop_1683.py",
+      "input_description": "第一行 n target，随后 n 个整数；有解时保证答案唯一。",
+      "output_description": "输出两个下标，较小者在前；无解输出 -1 -1。",
+      "explanation": "哈希表保存已访问值及其下标，查找 target-value。",
+      "complexity": "时间 O(n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1683:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4 9\n2 7 11 15\n",
+          "expected_stdout": "0 1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1683:1",
+          "name": "样例 / 边界 2",
+          "stdin": "2 6\n3 3\n",
+          "expected_stdout": "0 1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1683:2",
+          "name": "样例 / 边界 3",
+          "stdin": "3 20\n1 2 3\n",
+          "expected_stdout": "-1 -1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1638",
+      "display_id": "46",
+      "title": "全排列",
+      "file": "codetop_1638.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。 元素互不相同。",
+      "output_description": "每行一个全排列，空格分隔，行序不限。",
+      "explanation": "回溯选择尚未使用的下标，恢复现场后继续下一个选择。",
+      "complexity": "时间 O(n·n!)，除输出外空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1638:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3\n1 2 3\n",
+          "expected_stdout": "1 2 3\n1 3 2\n2 1 3\n2 3 1\n3 1 2\n3 2 1",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1638:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n8\n",
+          "expected_stdout": "8",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1638:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "unordered_lines"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1664",
+      "display_id": "20",
+      "title": "有效的括号",
+      "file": "codetop_1664.py",
+      "input_description": "一行只含 ()[]{} 的字符串，允许空行。",
+      "output_description": "有效输出 true，否则 false。",
+      "explanation": "左括号入栈，右括号必须与栈顶匹配。",
+      "complexity": "时间 O(n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1664:0",
+          "name": "样例 / 边界 1",
+          "stdin": "()[]{}\n",
+          "expected_stdout": "true",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1664:1",
+          "name": "样例 / 边界 2",
+          "stdin": "([)]\n",
+          "expected_stdout": "false",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1664:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\n",
+          "expected_stdout": "true",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1596",
+      "display_id": "88",
+      "title": "合并两个有序数组",
+      "file": "codetop_1596.py",
+      "input_description": "第一行 n m，随后 n 个 A 的有效元素和 m 个 B 的元素；都已升序，不输入 A 的预留零。",
+      "output_description": "输出合并后的升序数组。",
+      "explanation": "为 A 预留 m 个位置，从后向前写入两个尾部的较大值。",
+      "complexity": "时间 O(n+m)，额外空间 O(1)，输出数组空间另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1596:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3 3\n1 2 3\n2 5 6\n",
+          "expected_stdout": "1 2 2 3 5 6",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1596:1",
+          "name": "样例 / 边界 2",
+          "stdin": "0 1\n1\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1596:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1563",
+      "display_id": "121",
+      "title": "买卖股票的最佳时机",
+      "file": "codetop_1563.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。",
+      "output_description": "输出仅买卖一次可以获得的最大利润；不交易为 0。",
+      "explanation": "扫描中记录最低买入价，计算当日卖出的最大利润。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1563:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6\n7 1 5 3 6 4\n",
+          "expected_stdout": "5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1563:1",
+          "name": "样例 / 边界 2",
+          "stdin": "5\n7 6 4 3 1\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1563:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1592",
+      "display_id": "92",
+      "title": "反转链表 II",
+      "file": "codetop_1592.py",
+      "input_description": "第一行 n left right，随后 n 个节点值；1<=left<=right<=n。",
+      "output_description": "输出区间反转后的节点值。",
+      "explanation": "定位区间之前的节点，反复把后继插到区间最前方。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1592:0",
+          "name": "样例 / 边界 1",
+          "stdin": "5 2 4\n1 2 3 4 5\n",
+          "expected_stdout": "1 4 3 2 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1592:1",
+          "name": "样例 / 边界 2",
+          "stdin": "3 1 3\n1 2 3\n",
+          "expected_stdout": "3 2 1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1592:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1 1 1\n9\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1384",
+      "display_id": "300",
+      "title": "最长上升子序列",
+      "file": "codetop_1384.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。",
+      "output_description": "输出严格递增子序列的最大长度。",
+      "explanation": "tails[i] 记录长度 i+1 的递增子序列的最小结尾，二分替换。",
+      "complexity": "时间 O(n log n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1384:0",
+          "name": "样例 / 边界 1",
+          "stdin": "8\n10 9 2 5 3 7 101 18\n",
+          "expected_stdout": "4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1384:1",
+          "name": "样例 / 边界 2",
+          "stdin": "4\n7 7 7 7\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1384:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1581",
+      "display_id": "103",
+      "title": "二叉树的锯齿形层次遍历",
+      "file": "codetop_1581.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。",
+      "output_description": "每层一行，第一层由左至右，之后逐层交替。",
+      "explanation": "常规 BFS 得到每层节点，奇数层反转输出。",
+      "complexity": "时间 O(n)，空间 O(最大宽度)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1581:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7\n3 9 20 null null 15 7\n",
+          "expected_stdout": "3\n20 9\n15 7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1581:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n1\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1581:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1448",
+      "display_id": "236",
+      "title": "二叉树的最近公共祖先",
+      "file": "codetop_1448.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。 最后另输入 p q，节点值互异，p、q 保证存在。",
+      "output_description": "输出最近公共祖先的节点值。",
+      "explanation": "迭代建立父指针，记录 p 的祖先集合，再从 q 向上寻找交点。",
+      "complexity": "时间 O(n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1448:0",
+          "name": "样例 / 边界 1",
+          "stdin": "11\n3 5 1 6 2 0 8 null null 7 4\n5 1\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1448:1",
+          "name": "样例 / 边界 2",
+          "stdin": "11\n3 5 1 6 2 0 8 null null 7 4\n5 4\n",
+          "expected_stdout": "5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1448:2",
+          "name": "样例 / 边界 3",
+          "stdin": "1\n9\n9 9\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1661",
+      "display_id": "23",
+      "title": "合并K个排序链表",
+      "file": "codetop_1661.py",
+      "input_description": "第一行 k，随后依次输入每条链表的长度 ni 及 ni 个升序节点值。",
+      "output_description": "输出合并后的全部节点值。",
+      "explanation": "最小堆保存每条链表当前头节点，取出后推进该链表。",
+      "complexity": "时间 O(N log k)，空间 O(k)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1661:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3\n3 1 4 5\n3 1 3 4\n2 2 6\n",
+          "expected_stdout": "1 1 2 3 4 4 5 6",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1661:1",
+          "name": "样例 / 边界 2",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1661:2",
+          "name": "样例 / 边界 3",
+          "stdin": "2\n0\n2 -2 3\n",
+          "expected_stdout": "-2 3",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1630",
+      "display_id": "54",
+      "title": "螺旋矩阵",
+      "file": "codetop_1630.py",
+      "input_description": "第一行 m n，随后 m*n 个矩阵元素，按行输入。",
+      "output_description": "输出顺时针螺旋遍历结果，空格分隔。",
+      "explanation": "维护上下左右边界，每绕一圈缩小边界并检查是否仍有行列。",
+      "complexity": "时间 O(mn)，除输出外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1630:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3 3\n1 2 3\n4 5 6\n7 8 9\n",
+          "expected_stdout": "1 2 3 6 9 8 7 4 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1630:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 3\n1 2 3\n",
+          "expected_stdout": "1 2 3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1630:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1541",
+      "display_id": "143",
+      "title": "重排链表",
+      "file": "codetop_1541.py",
+      "input_description": "第一行 n，随后 n 个整数表示链表节点值；n=0 表示空链表。",
+      "output_description": "输出按 L0,Ln,L1,Ln-1… 重排后的链表节点值。",
+      "explanation": "快慢指针找中点，反转后半段，然后交替合并。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1541:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4\n1 2 3 4\n",
+          "expected_stdout": "1 4 2 3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1541:1",
+          "name": "样例 / 边界 2",
+          "stdin": "5\n1 2 3 4 5\n",
+          "expected_stdout": "1 5 2 4 3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1541:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1543",
+      "display_id": "141",
+      "title": "环形链表",
+      "file": "codetop_1543.py",
+      "input_description": "第一行 n pos，随后 n 个节点值；pos=-1 表示无环，否则尾节点连接到从 0 开始的 pos 节点。",
+      "output_description": "有环输出 true，无环输出 false。",
+      "explanation": "Floyd 快慢指针，相遇说明存在环。",
+      "complexity": "时间 O(n)，额外空间 O(1)，输入建链空间另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1543:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4 1\n3 2 0 -4\n",
+          "expected_stdout": "true",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1543:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 -1\n1\n",
+          "expected_stdout": "false",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1543:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 -1\n",
+          "expected_stdout": "false",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1269",
+      "display_id": "415",
+      "title": "字符串相加",
+      "file": "codetop_1269.py",
+      "input_description": "两行非负整数字符串，不带符号和多余前导零（0 除外）。",
+      "output_description": "输出相加结果的十进制字符串。",
+      "explanation": "从末位开始逐位相加并传递进位，不把整个字符串转换为整数。",
+      "complexity": "时间 O(n+m)，空间 O(n+m)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1269:0",
+          "name": "样例 / 边界 1",
+          "stdin": "11\n123\n",
+          "expected_stdout": "134",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1269:1",
+          "name": "样例 / 边界 2",
+          "stdin": "999\n1\n",
+          "expected_stdout": "1000",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1269:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1628",
+      "display_id": "56",
+      "title": "合并区间",
+      "file": "codetop_1628.py",
+      "input_description": "第一行区间数 n，随后 n 对 start end；闭区间。",
+      "output_description": "合并后按起点升序，每行一个区间。",
+      "explanation": "按起点排序，能与当前区间重叠就扩展右端点。",
+      "complexity": "时间 O(n log n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1628:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4\n1 3\n2 6\n8 10\n15 18\n",
+          "expected_stdout": "1 6\n8 10\n15 18",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1628:1",
+          "name": "样例 / 边界 2",
+          "stdin": "2\n1 4\n4 5\n",
+          "expected_stdout": "1 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1628:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1612",
+      "display_id": "72",
+      "title": "编辑距离",
+      "file": "codetop_1612.py",
+      "input_description": "两行字符串 word1、word2，允许空行。",
+      "output_description": "输出插入、删除、替换的最少操作数。",
+      "explanation": "滚动数组动态规划，dp[j] 表示当前前缀与另一个前缀的编辑距离。",
+      "complexity": "时间 O(nm)，空间 O(m)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1612:0",
+          "name": "样例 / 边界 1",
+          "stdin": "horse\nros\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1612:1",
+          "name": "样例 / 边界 2",
+          "stdin": "intention\nexecution\n",
+          "expected_stdout": "5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1612:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\nabc\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1524",
+      "display_id": "160",
+      "title": "相交链表",
+      "file": "codetop_1524.py",
+      "input_description": "第一行 a b c，随后分别输入 A 独有前缀的 a 个值、B 独有前缀的 b 个值、共享尾段的 c 个值。",
+      "output_description": "相交输出第一个共享节点的值；不相交输出 null。",
+      "explanation": "按输入构造共享节点身份。双指针走到尾部后转到另一条链表，相遇即交点。",
+      "complexity": "时间 O(a+b+c)，算法额外空间 O(1)，建链另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1524:0",
+          "name": "样例 / 边界 1",
+          "stdin": "2 3 3\n4 1\n5 6 1\n8 4 5\n",
+          "expected_stdout": "8",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1524:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 1 0\n1\n1\n",
+          "expected_stdout": "null",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1524:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 0 1\n9\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1642",
+      "display_id": "42",
+      "title": "接雨水",
+      "file": "codetop_1642.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。 高度非负。",
+      "output_description": "输出可接雨水的总量。",
+      "explanation": "双指针维护左右最高墙，较低一侧的蓄水量已经确定。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1642:0",
+          "name": "样例 / 边界 1",
+          "stdin": "12\n0 1 0 2 1 0 1 3 2 1 2 1\n",
+          "expected_stdout": "6",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1642:1",
+          "name": "样例 / 边界 2",
+          "stdin": "6\n4 2 0 3 2 5\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1642:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "485",
+      "display_id": "1143",
+      "title": "最长公共子序列",
+      "file": "codetop_485.py",
+      "input_description": "两行字符串，允许空行。",
+      "output_description": "输出最长公共子序列长度。",
+      "explanation": "滚动数组 DP：字符相同则左上角加一，否则取上方与左方最大值。",
+      "complexity": "时间 O(nm)，空间 O(m)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:485:0",
+          "name": "样例 / 边界 1",
+          "stdin": "abcde\nace\n",
+          "expected_stdout": "3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:485:1",
+          "name": "样例 / 边界 2",
+          "stdin": "abc\ndef\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:485:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\nabc\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1602",
+      "display_id": "82",
+      "title": "删除排序链表中的重复元素 II",
+      "file": "codetop_1602.py",
+      "input_description": "第一行 n，随后 n 个整数表示链表节点值；n=0 表示空链表。 链表已升序。",
+      "output_description": "只保留原链表中没有重复出现过的节点，输出节点值。",
+      "explanation": "跳过相同值的一整段，仅将长度为一的段接入答案。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1602:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7\n1 2 3 3 4 4 5\n",
+          "expected_stdout": "1 2 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1602:1",
+          "name": "样例 / 边界 2",
+          "stdin": "5\n1 1 1 2 3\n",
+          "expected_stdout": "2 3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1602:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1591",
+      "display_id": "93",
+      "title": "复原IP地址",
+      "file": "codetop_1591.py",
+      "input_description": "一行只含数字的字符串。",
+      "output_description": "每行一个合法 IPv4 地址，行序不限，无解输出空行。",
+      "explanation": "回溯切分四段，每段不超过 255，且多位数不能以 0 开头。",
+      "complexity": "最多 3^4 种分段尝试，额外空间 O(1)，输出另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1591:0",
+          "name": "样例 / 边界 1",
+          "stdin": "25525511135\n",
+          "expected_stdout": "255.255.11.135\n255.255.111.35",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1591:1",
+          "name": "样例 / 边界 2",
+          "stdin": "0000\n",
+          "expected_stdout": "0.0.0.0",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1591:2",
+          "name": "样例 / 边界 3",
+          "stdin": "123\n",
+          "expected_stdout": "",
+          "comparison": "unordered_lines"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1560",
+      "display_id": "124",
+      "title": "二叉树中的最大路径和",
+      "file": "codetop_1560.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。 通常至少一个非空节点；空树约定输出 0。",
+      "output_description": "输出可从任意节点开始结束、不重复经过节点的最大路径和。",
+      "explanation": "迭代后序，计算每个节点向父节点贡献的单边最大值，同时更新经过本节点的双边路径。",
+      "complexity": "时间 O(n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1560:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7\n-10 9 20 null null 15 7\n",
+          "expected_stdout": "42",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1560:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n-3\n",
+          "expected_stdout": "-3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1560:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1665",
+      "display_id": "19",
+      "title": "删除链表的倒数第N个节点",
+      "file": "codetop_1665.py",
+      "input_description": "第一行 n k，随后 n 个节点值；1<=k<=n。",
+      "output_description": "输出删除倒数第 k 个节点后的链表。",
+      "explanation": "快指针先走 k 步，然后两指针同步，慢指针停在待删节点之前。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1665:0",
+          "name": "样例 / 边界 1",
+          "stdin": "5 2\n1 2 3 4 5\n",
+          "expected_stdout": "1 2 3 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1665:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 1\n1\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1665:2",
+          "name": "样例 / 边界 3",
+          "stdin": "2 2\n1 2\n",
+          "expected_stdout": "2",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1680",
+      "display_id": "4",
+      "title": "寻找两个正序数组的中位数",
+      "file": "codetop_1680.py",
+      "input_description": "第一行 n m，随后 n 个 A 元素和 m 个 B 元素，均升序，n+m>=1。",
+      "output_description": "输出中位数，允许小数；使用浮点容差比较。",
+      "explanation": "对较短数组二分划分点，使左右两部分分别有序且大小相差不超过一。",
+      "complexity": "时间 O(log min(n,m))，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1680:0",
+          "name": "样例 / 边界 1",
+          "stdin": "2 1\n1 3\n2\n",
+          "expected_stdout": "2",
+          "comparison": "float"
+        },
+        {
+          "id": "builtin:1680:1",
+          "name": "样例 / 边界 2",
+          "stdin": "2 2\n1 2\n3 4\n",
+          "expected_stdout": "2.5",
+          "comparison": "float"
+        },
+        {
+          "id": "builtin:1680:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 1\n7\n",
+          "expected_stdout": "7",
+          "comparison": "float"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1542",
+      "display_id": "142",
+      "title": "环形链表 II",
+      "file": "codetop_1542.py",
+      "input_description": "第一行 n pos，随后 n 个节点值；pos=-1 无环，否则尾节点连接到下标 pos。",
+      "output_description": "输出环入口的从 0 开始的下标；无环输出 -1。",
+      "explanation": "Floyd 相遇后，一个指针回到头部，两者同步前进得到入口，再计算其下标。",
+      "complexity": "时间 O(n)，算法额外空间 O(1)，建链另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1542:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4 1\n3 2 0 -4\n",
+          "expected_stdout": "1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1542:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 0\n7\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1542:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 -1\n",
+          "expected_stdout": "-1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1519",
+      "display_id": "165",
+      "title": "比较版本号",
+      "file": "codetop_1519.py",
+      "input_description": "两行点分版本号，每段为非负整数；允许段内前导零。",
+      "output_description": "前者较大输出 1，较小输出 -1，相同输出 0。",
+      "explanation": "按段转换为整数并比较，缺失的尾段补零。",
+      "complexity": "时间 O(n+m)，空间 O(n+m)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1519:0",
+          "name": "样例 / 边界 1",
+          "stdin": "1.01\n1.001\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1519:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1.0\n1.0.0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1519:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0.1\n1.1\n",
+          "expected_stdout": "-1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1485",
+      "display_id": "199",
+      "title": "二叉树的右视图",
+      "file": "codetop_1485.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。",
+      "output_description": "输出每层最右节点的值，空格分隔。",
+      "explanation": "BFS 扫描每层，保留该层最后一个节点。",
+      "complexity": "时间 O(n)，空间 O(最大宽度)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1485:0",
+          "name": "样例 / 边界 1",
+          "stdin": "7\n1 2 3 null 5 null 4\n",
+          "expected_stdout": "1 3 4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1485:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n7\n",
+          "expected_stdout": "7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1485:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1445",
+      "display_id": "239",
+      "title": "滑动窗口最大值",
+      "file": "codetop_1445.py",
+      "input_description": "第一行 n k，随后 n 个整数；1<=k<=n。",
+      "output_description": "输出每个长度 k 的滑动窗口最大值。",
+      "explanation": "维护下标单调队列，移除过期下标与不可能成为最大值的队尾。",
+      "complexity": "时间 O(n)，空间 O(k)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1445:0",
+          "name": "样例 / 边界 1",
+          "stdin": "8 3\n1 3 -1 -3 5 3 6 7\n",
+          "expected_stdout": "3 3 5 5 6 7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1445:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1 1\n9\n",
+          "expected_stdout": "9",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1445:2",
+          "name": "样例 / 边界 3",
+          "stdin": "3 2\n4 4 4\n",
+          "expected_stdout": "4 4",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1662",
+      "display_id": "22",
+      "title": "括号生成",
+      "file": "codetop_1662.py",
+      "input_description": "一个非负整数 n，表示括号对数。",
+      "output_description": "每行一个有效括号组合，行序不限；n=0 输出空行。",
+      "explanation": "回溯时左括号不超过 n，右括号不超过已经放置的左括号。",
+      "complexity": "时间与有效组合总长度成正比，辅助空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1662:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3\n",
+          "expected_stdout": "((()))\n(()())\n(())()\n()(())\n()()()",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1662:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n",
+          "expected_stdout": "()",
+          "comparison": "unordered_lines"
+        },
+        {
+          "id": "builtin:1662:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "unordered_lines"
+        }
+      ]
+    },
+    {
+      "source_record_id": "925",
+      "display_id": "704",
+      "title": "二分查找",
+      "file": "codetop_925.py",
+      "input_description": "第一行 n target，随后 n 个互不相同且升序的整数。",
+      "output_description": "输出目标下标，不存在输出 -1。",
+      "explanation": "标准闭区间二分，根据中点值缩小搜索区间。",
+      "complexity": "时间 O(log n)，空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:925:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6 9\n-1 0 3 5 9 12\n",
+          "expected_stdout": "4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:925:1",
+          "name": "样例 / 边界 2",
+          "stdin": "6 2\n-1 0 3 5 9 12\n",
+          "expected_stdout": "-1",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:925:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0 9\n",
+          "expected_stdout": "-1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1652",
+      "display_id": "32",
+      "title": "最长有效括号",
+      "file": "codetop_1652.py",
+      "input_description": "一行只含左右圆括号的字符串，允许空行。",
+      "output_description": "输出最长连续有效括号子串的长度。",
+      "explanation": "栈存未匹配左括号下标，初始放 -1，遇到无法匹配的右括号重设边界。",
+      "complexity": "时间 O(n)，空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1652:0",
+          "name": "样例 / 边界 1",
+          "stdin": "(()\n",
+          "expected_stdout": "2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1652:1",
+          "name": "样例 / 边界 2",
+          "stdin": ")()())\n",
+          "expected_stdout": "4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1652:2",
+          "name": "样例 / 边界 3",
+          "stdin": "\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1615",
+      "display_id": "69",
+      "title": "x 的平方根",
+      "file": "codetop_1615.py",
+      "input_description": "一个非负整数 x。",
+      "output_description": "输出平方根的向下取整值。",
+      "explanation": "二分查找满足 mid*mid<=x 的最大整数。",
+      "complexity": "时间 O(log x)，空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1615:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4\n",
+          "expected_stdout": "2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1615:1",
+          "name": "样例 / 边界 2",
+          "stdin": "8\n",
+          "expected_stdout": "2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1615:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "0",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1536",
+      "display_id": "148",
+      "title": "排序链表",
+      "file": "codetop_1536.py",
+      "input_description": "第一行 n，随后 n 个整数表示链表节点值；n=0 表示空链表。",
+      "output_description": "输出升序排序后的链表节点值。",
+      "explanation": "自底向上归并，每轮把长度为 size 的相邻段合并，size 翻倍。",
+      "complexity": "时间 O(n log n)，算法额外空间 O(1)，输入建链另计。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1536:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4\n4 2 1 3\n",
+          "expected_stdout": "1 2 3 4",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1536:1",
+          "name": "样例 / 边界 2",
+          "stdin": "5\n-1 5 3 4 0\n",
+          "expected_stdout": "-1 0 3 4 5",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1536:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1590",
+      "display_id": "94",
+      "title": "二叉树的中序遍历",
+      "file": "codetop_1590.py",
+      "input_description": "第一行 n，随后 n 个层序序列项，空节点写 null；n 包含 null 项。按队列为非空节点依次分配左右孩子，n=0 表示空树。",
+      "output_description": "输出中序遍历的节点值，空格分隔。",
+      "explanation": "显式栈模拟递归：先走到最左，再访问节点并转向右子树。",
+      "complexity": "时间 O(n)，空间 O(h)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1590:0",
+          "name": "样例 / 边界 1",
+          "stdin": "4\n1 null 2 3\n",
+          "expected_stdout": "1 3 2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1590:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\n7\n",
+          "expected_stdout": "7",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1590:2",
+          "name": "样例 / 边界 3",
+          "stdin": "0\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1452",
+      "display_id": "232",
+      "title": "用栈实现队列",
+      "file": "codetop_1452.py",
+      "input_description": "第一行 q，随后 q 行 push x、pop、peek 或 empty；pop/peek 保证非空。",
+      "output_description": "pop/peek 输出值；empty 输出 true/false；push 不输出。",
+      "explanation": "入队压入输入栈，出队时若输出栈为空则整体倒入输出栈。",
+      "complexity": "每次操作均摊 O(1)，总空间 O(n)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1452:0",
+          "name": "样例 / 边界 1",
+          "stdin": "6\npush 1\npush 2\npeek\npop\nempty\npop\n",
+          "expected_stdout": "1\n1\nfalse\n2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1452:1",
+          "name": "样例 / 边界 2",
+          "stdin": "1\nempty\n",
+          "expected_stdout": "true",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1452:2",
+          "name": "样例 / 边界 3",
+          "stdin": "4\npush 9\npop\nempty\npush 2\n",
+          "expected_stdout": "9\ntrue",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1653",
+      "display_id": "31",
+      "title": "下一个排列",
+      "file": "codetop_1653.py",
+      "input_description": "第一行 n，随后 n 个整数（可分行）。n 是数组长度。",
+      "output_description": "输出字典序下一个排列；若已最大则输出升序最小排列。",
+      "explanation": "从右找首个上升转折点，与右侧刚好更大的数交换，再反转右侧降序段。",
+      "complexity": "时间 O(n)，额外空间 O(1)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1653:0",
+          "name": "样例 / 边界 1",
+          "stdin": "3\n1 2 3\n",
+          "expected_stdout": "1 3 2",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1653:1",
+          "name": "样例 / 边界 2",
+          "stdin": "3\n3 2 1\n",
+          "expected_stdout": "1 2 3",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1653:2",
+          "name": "样例 / 边界 3",
+          "stdin": "3\n1 1 5\n",
+          "expected_stdout": "1 5 1",
+          "comparison": "tokens"
+        }
+      ]
+    },
+    {
+      "source_record_id": "1608",
+      "display_id": "76",
+      "title": "最小覆盖子串",
+      "file": "codetop_1608.py",
+      "input_description": "两行字符串 s、t，允许空行。",
+      "output_description": "输出覆盖 t 全部字符及重复次数的最短子串；等长取最左，无解输出空行。",
+      "explanation": "滑动窗口统计欠缺字符；全部覆盖后收缩左边界并更新答案。",
+      "complexity": "时间 O(n+m)，空间 O(字符集大小)。",
+      "attribution": "本地原创学习参考（非官方题解）",
+      "cases": [
+        {
+          "id": "builtin:1608:0",
+          "name": "样例 / 边界 1",
+          "stdin": "ADOBECODEBANC\nABC\n",
+          "expected_stdout": "BANC",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1608:1",
+          "name": "样例 / 边界 2",
+          "stdin": "a\naa\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1608:2",
+          "name": "样例 / 边界 3",
+          "stdin": "aa\naa\n",
+          "expected_stdout": "aa",
+          "comparison": "tokens"
+        },
+        {
+          "id": "builtin:1608:3",
+          "name": "样例 / 边界 4",
+          "stdin": "abc\n\n",
+          "expected_stdout": "",
+          "comparison": "tokens"
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
-  "app_version": "1.0.0",
-  "schema_version": "0001",
+  "app_version": "1.1.0",
+  "schema_version": "0002",
   "project_root": "D:\\my_develop\\A_work_program\\code_platform",
   "deployment_path_override": true,
   "python": "3.12.13",
@@ -113,5 +113,24 @@
       "typescript-eslint": "^8.17.0",
       "vite": "^5.4.11"
     }
+  },
+  "runner": {
+    "image": "python@sha256:2259debdc6af85626058a15a7bf44ad6a68b8c98c9ae82a02cf5cdb92f096d47",
+    "source_tag": "python:3.12-slim",
+    "python_series": "3.12",
+    "case_timeout_seconds": 2,
+    "memory_mb": 256,
+    "output_limit_bytes": 65536,
+    "provenance": "Docker Official Image library/python; pulled 2026-10-21",
+    "engine_version": "29.8.2",
+    "python_version": "3.12.15",
+    "worker_sha256": "72cee5401a6eb8a4d9a72a3f8b37644312d7198812e557e553944e60e5542575",
+    "reference_manifest_sha256": "efa494a0fdeda1d559e938f9ebc5f13c6bbc4acdb3befee0b6c31352eacea59d",
+    "verified_reference_programs": 50,
+    "verified_reference_cases": 152,
+    "verified_at": "2026-10-21"
+  },
+  "migrations": {
+    "0002_acm_sha256": "b2a6c72a8f5f46b2cb2dc1afb5b07aa9aff663481ac10f19d97a20c3030caedd"
   }
 }

@@ -59,3 +59,15 @@ settings = Table('settings', metadata, Column('key', String, primary_key=True), 
 previews = Table('import_previews', metadata,
     Column('id', String, primary_key=True), Column('source_name', String, nullable=False), Column('sha256', String, nullable=False),
     Column('kind', String, nullable=False), Column('summary_json', Text, nullable=False), Column('created_at', String, nullable=False))
+
+test_suites = Table('problem_test_suites', metadata,
+    Column('problem_id', String, ForeignKey('problems.id'), primary_key=True),
+    Column('revision', Integer, nullable=False), Column('cases_json', Text, nullable=False),
+    Column('updated_at', String, nullable=False))
+runs = Table('code_runs', metadata,
+    Column('id', String, primary_key=True), Column('problem_id', String, ForeignKey('problems.id'), nullable=False),
+    Column('request_id', String, nullable=False, unique=True), Column('request_hash', String, nullable=False),
+    Column('source_code', Text, nullable=False), Column('tests_json', Text, nullable=False),
+    Column('results_json', Text), Column('status', String, nullable=False), Column('error', Text),
+    Column('image_ref', String), Column('created_at', String, nullable=False), Column('finished_at', String))
+Index('ix_problem_runs', runs.c.problem_id, runs.c.created_at)

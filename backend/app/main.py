@@ -30,6 +30,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
         if lock: lock.__enter__()
         try:
             db.migrate()
+            from .runner.service import RunService
+            app.state.run_service=RunService(db,now)
             if bootstrap:
                 from sqlalchemy import select, func
                 from .models import datasets
@@ -43,11 +45,15 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
                 if not any((db.data_dir/'backups').glob(f'*-daily-{today}-*.zip')): create_backup(db, reason=f'daily-{today}')
             yield
         finally:
+            if hasattr(app.state,'run_service'): app.state.run_service.close()
             db.engine.dispose()
             if lock: lock.__exit__()
 
     app = FastAPI(title='CodeTop Local', version=__version__, lifespan=lifespan)
     app.state.db = db
+    app.state.clock = now
+    from .runner.routes import router as runner_router
+    app.include_router(runner_router)
 
     @app.middleware('http')
     async def local_boundary(request: Request, call_next):

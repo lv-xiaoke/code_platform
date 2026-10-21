@@ -1,0 +1,9 @@
+{
+  "image": "python@sha256:2259debdc6af85626058a15a7bf44ad6a68b8c98c9ae82a02cf5cdb92f096d47",
+  "source_tag": "python:3.12-slim",
+  "python_series": "3.12",
+  "case_timeout_seconds": 2,
+  "memory_mb": 256,
+  "output_limit_bytes": 65536,
+  "provenance": "Docker Official Image library/python; pulled 2026-10-21"
+}
