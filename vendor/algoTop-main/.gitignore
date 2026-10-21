@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+.dev.vars
+.dev.vars.*
+.DS_Store
+**/.DS_Store
+.playwright-cli
+output/playwright
+*.tsbuildinfo
