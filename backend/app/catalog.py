@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 
 from . import models as m
 from .imports import dataset_dict
-from .learning import get_state, get_note
+from .learning import get_state, get_note, get_completion, completion_overrides
 from .scheduler import TZ
 
 
@@ -49,6 +49,8 @@ def list_problems(db, now, *, source=None, dataset_id=None, page=1, page_size=20
             if key: members.append(set(conn.execute(select(m.stats.c.problem_id).where(m.stats.c.dataset_id == ds['id'], m.stats.c.scope_type == typ, m.stats.c.scope_key == key)).scalars()))
         states = {r['problem_id']:dict(r) for r in conn.execute(select(m.state)).mappings()}
         practiced = set(conn.execute(select(m.logs.c.problem_id).distinct()).scalars())
+        overrides=completion_overrides(conn)
+        completed=(practiced-{pid for pid,done in overrides.items() if not done})|{pid for pid,done in overrides.items() if done}
         notepids = set(conn.execute(select(m.notes.c.problem_id)).scalars())
         if history or due:
             # Latest entry per stable UUID, retaining questions absent from active snapshots.
@@ -69,14 +71,14 @@ def list_problems(db, now, *, source=None, dataset_id=None, page=1, page_size=20
             if not (history or due) and pid not in ranking: continue
             if search and search.casefold() not in (entry['display_id']+' '+entry['title']).casefold(): continue
             if difficulty is not None and entry['difficulty'] != difficulty: continue
-            if completion=='done' and pid not in practiced or completion=='todo' and pid in practiced: continue
+            if completion=='done' and pid not in completed or completion=='todo' and pid in completed: continue
             if mastery is not None and state.get('mastery',0) != mastery: continue
             if favorite and not state.get('favorite'): continue
             if due and not (state.get('review_enabled') and state.get('next_review_date') and state['next_review_date'] <= today): continue
             st = ranking.get(pid, {})
             last_seen = st.get('last_seen')
             if recent_days and (not last_seen or datetime.fromisoformat(last_seen.replace('Z','+00:00')).astimezone(TZ).date() < now.astimezone(TZ).date()-timedelta(days=recent_days)): continue
-            result.append({**dict(entry), 'id':pid, 'frequency':st.get('frequency_value'), 'last_seen':last_seen, 'mastery':state.get('mastery',0), 'favorite':bool(state.get('favorite')), 'done':pid in practiced, 'has_note':pid in notepids, 'next_review_date':state.get('next_review_date'), 'review_enabled':bool(state.get('review_enabled'))})
+            result.append({**dict(entry), 'id':pid, 'frequency':st.get('frequency_value'), 'last_seen':last_seen, 'mastery':state.get('mastery',0), 'favorite':bool(state.get('favorite')), 'done':pid in completed, 'state_revision':state.get('revision',0), 'has_note':pid in notepids, 'next_review_date':state.get('next_review_date'), 'review_enabled':bool(state.get('review_enabled'))})
     def displaykey(row):
         value = row['display_id']
         return (0, int(value), row['id']) if value.isdigit() else (1, value, row['id'])
@@ -96,4 +98,4 @@ def detail(db, pid, dataset_id=None):
         row = conn.execute(query.order_by((m.datasets.c.status=='active').desc(), m.datasets.c.imported_at.desc())).mappings().first()
         if not row: raise HTTPException(404, '题目不存在')
         attempts = [dict(r) for r in conn.execute(select(m.logs).where(m.logs.c.problem_id == pid).order_by(m.logs.c.practiced_at.desc())) .mappings()]
-        return {**dict(row), 'id':pid, 'state':get_state(conn,pid), 'note':get_note(conn,pid), 'attempts':attempts}
+        return {**dict(row), 'id':pid, 'state':get_state(conn,pid), 'done':get_completion(conn,pid), 'note':get_note(conn,pid), 'attempts':attempts}

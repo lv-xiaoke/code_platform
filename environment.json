@@ -1,5 +1,5 @@
 {
-  "app_version": "1.1.0",
+  "app_version": "1.2.0",
   "schema_version": "0002",
   "project_root": "D:\\my_develop\\A_work_program\\code_platform",
   "deployment_path_override": true,
@@ -132,5 +132,22 @@
   },
   "migrations": {
     "0002_acm_sha256": "b2a6c72a8f5f46b2cb2dc1afb5b07aa9aff663481ac10f19d97a20c3030caedd"
+  },
+  "interface": {
+    "entry": "frontend/src/local/CatalogApp.tsx",
+    "mode": "catalog-and-notes",
+    "filters": [
+      "search",
+      "company",
+      "department",
+      "job",
+      "tag",
+      "difficulty",
+      "recent_days",
+      "ordering"
+    ],
+    "reference_programs": 50,
+    "local_runner_ui": false,
+    "schema_migration_required": false
   }
 }

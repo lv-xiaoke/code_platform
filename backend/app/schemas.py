@@ -15,6 +15,7 @@ class NoteWrite(StrictModel):
 
 class StateWrite(StrictModel):
     revision: int = Field(ge=0)
+    done: bool | None = None
     mastery: int | None = Field(default=None, ge=0, le=3)
     favorite: bool | None = None
     review_enabled: bool | None = None

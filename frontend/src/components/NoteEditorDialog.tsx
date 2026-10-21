@@ -224,7 +224,7 @@ function renderInlineMarkdown(text: string) {
   return nodes.length > 0 ? nodes : text;
 }
 
-function MarkdownPreview({
+export function MarkdownPreview({
   content,
   previewRef,
 }: {

@@ -31,6 +31,26 @@ def get_note(conn, pid):
     return dict(row) if row else dict(problem_id=pid, body_md='', code_text='', language='python', revision=0, updated_at='')
 
 
+def completion_overrides(conn):
+    prefix='completion:'
+    return {row.key[len(prefix):]:json.loads(row.value_json) for row in conn.execute(
+        select(m.settings).where(m.settings.c.key.startswith(prefix)))}
+
+
+def get_completion(conn,pid):
+    override=conn.execute(select(m.settings.c.value_json).where(m.settings.c.key=='completion:'+pid)).scalar()
+    if override is not None: return json.loads(override) is True
+    return conn.execute(select(m.logs.c.id).where(m.logs.c.problem_id==pid).limit(1)).first() is not None
+
+
+def set_completion(conn,pid,done):
+    key='completion:'+pid
+    values={'key':key,'value_json':json.dumps(done)}
+    if conn.execute(select(m.settings.c.key).where(m.settings.c.key==key)).first():
+        conn.execute(update(m.settings).where(m.settings.c.key==key).values(value_json=values['value_json']))
+    else: conn.execute(insert(m.settings).values(**values))
+
+
 def save_state(conn, state, now):
     exists = conn.execute(select(m.state.c.problem_id).where(m.state.c.problem_id == state['problem_id'])).first()
     result = {**state, 'revision': state['revision']+1, 'updated_at': utc_text(now)}
@@ -55,12 +75,13 @@ def patch_state(db, pid, payload, now):
         require_problem(conn, pid)
         state = get_state(conn, pid)
         if state['revision'] != payload.revision: raise HTTPException(409, '学习状态已更新，请刷新后重试')
-        state.update(payload.model_dump(exclude={'revision'}, exclude_none=True))
+        state.update(payload.model_dump(exclude={'revision','done'}, exclude_none=True))
+        if payload.done is not None: set_completion(conn,pid,payload.done)
         if payload.review_enabled is not None:
             key = 'review-explicit:' + pid
             if not conn.execute(select(m.settings.c.key).where(m.settings.c.key == key)).first():
                 conn.execute(insert(m.settings).values(key=key, value_json='true'))
-        return save_state(conn, state, now)
+        return {**save_state(conn, state, now),'done':get_completion(conn,pid)}
 
 
 def record_attempt(db, pid, payload, now):
@@ -79,6 +100,9 @@ def record_attempt(db, pid, payload, now):
         result = save_state(conn, result, now)
         attempt = dict(id=str(uuid4()), problem_id=pid, request_id=payload.request_id, practiced_at=utc_text(now), outcome=payload.outcome, duration_seconds=payload.duration_seconds, scheduler_version='fixed-v1')
         conn.execute(insert(m.logs).values(**attempt))
+        # A genuinely new practice re-completes an explicitly unchecked item.
+        # Historical/idempotent retries above do not change a manual mark.
+        conn.execute(update(m.settings).where(m.settings.c.key=='completion:'+pid).values(value_json='true'))
     return {'duplicate': False, 'attempt':attempt, 'state':result}
 
 
