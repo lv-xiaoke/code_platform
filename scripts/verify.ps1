@@ -4,7 +4,7 @@ Push-Location -LiteralPath $AppRoot
 try {
     & $PythonExe -m pytest -c backend/pytest.ini backend/tests -q --tb=short
     if ($LASTEXITCODE -ne 0) { throw 'Backend verification failed.' }
-    & $NodeExe --test frontend/tests/acm-requests.test.mjs frontend/tests/catalog-controls.test.mjs
+    & $NodeExe --test frontend/tests/acm-requests.test.mjs frontend/tests/catalog-controls.test.mjs frontend/tests/practice-session.test.mjs frontend/tests/problem-entry.test.mjs
     if ($LASTEXITCODE -ne 0) { throw 'Frontend request verification failed.' }
     Push-Location -LiteralPath (Join-Path $AppRoot 'frontend')
     try {

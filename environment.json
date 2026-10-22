@@ -1,5 +1,5 @@
 {
-  "app_version": "1.2.0",
+  "app_version": "1.3.0",
   "schema_version": "0002",
   "project_root": "D:\\my_develop\\A_work_program\\code_platform",
   "deployment_path_override": true,
@@ -135,7 +135,7 @@
   },
   "interface": {
     "entry": "frontend/src/local/CatalogApp.tsx",
-    "mode": "catalog-and-notes",
+    "mode": "catalog-and-local-practice",
     "filters": [
       "search",
       "company",
@@ -147,7 +147,8 @@
       "ordering"
     ],
     "reference_programs": 50,
-    "local_runner_ui": false,
-    "schema_migration_required": false
+    "local_runner_ui": true,
+    "schema_migration_required": false,
+    "local_statements": 1132
   }
 }

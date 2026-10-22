@@ -10,7 +10,7 @@ import {ReferencePanel} from './ReferencePanel'
 import {RunResults,runLabel} from './RunResults'
 import './acm.css'
 
-type Props={problemId:string;code:string;language:string;onCodeChange:(code:string)=>void;onLanguageChange:(language:string)=>void;registerGuard:(guard:(()=>Promise<boolean>)|null)=>void}
+type Props={problemId:string;code:string;language:string;onCodeChange:(code:string)=>void;onLanguageChange:(language:string)=>void;registerGuard:(guard:(()=>Promise<boolean>)|null)=>void;beforeRun?:()=>Promise<boolean>}
 
 export default function AcmWorkspace(props:Props){
   const acm=useQuery({queryKey:['acm',props.problemId],queryFn:()=>api<AcmData>(`/problems/${props.problemId}/acm`),staleTime:0})
@@ -35,6 +35,7 @@ function AcmContent({initial,...props}:Props&{initial:AcmData}){
     if(!source.trim()){setError('请先编写完整 Python 程序，或使用参考实现运行。');return}
     setSubmitting(true)
     try{
+      if(props.beforeRun&&!await props.beforeRun())return
       if(!await suite.flush())return
       const {submission,signature}=prepareRun(source,mode,suite.snapshot())
       if(pending.current?.signature!==signature)pending.current={signature,body:{...submission,request_id:crypto.randomUUID()}}
@@ -53,12 +54,13 @@ function AcmContent({initial,...props}:Props&{initial:AcmData}){
   const runDisabled=busy||!health.data?.available
   return <section className="acm-workspace" aria-label="Python ACM 工作区"><header className="acm-title"><div><span className="eyebrow">WRITE · RUN · UNDERSTAND</span><h3><Terminal size={18}/>Python ACM 工作区</h3></div><span className={'runner-chip '+(health.data?.available?'ready':'')}>{health.isFetching?'检查运行环境…':health.data?.available?'Docker 已就绪':'Docker 未就绪'}</span></header>
     {(health.error||health.data?.error)&&<div className="local-error" role="alert">{health.error?.message??health.data?.error}<button onClick={()=>void health.refetch()}><RefreshCw size={13}/>重新检查</button></div>}
+    {health.data&&!health.data.available&&<p className="runner-setup-hint">本地运行需要 Docker Desktop 已启动并安装 Python 镜像。首次准备可运行 <code>.\scripts\setup-runner.ps1</code>，完成后点击“重新检查”。题目阅读、代码和测试编辑仍可使用。</p>}
     <details className="acm-contract" open><summary>本题 ACM 输入输出约定</summary><p className="muted small">{initial.contract_notice}</p>{initial.reference?<div className="contract-grid"><div><h4>输入格式</h4><p>{initial.reference.input_description}</p></div><div><h4>输出格式</h4><p>{initial.reference.output_description}</p></div></div>:<p className="small">自行约定输入格式，使用 input() 或 sys.stdin 读取，并用 print() 输出。可以保存期望输出，或只运行观察结果。</p>}</details>
     <div className="acm-editor-heading"><strong>我的代码</strong><div><select aria-label="代码语言" value={props.language} onChange={e=>props.onLanguageChange(e.target.value)}>{['python','cpp','java','javascript','typescript','go','rust','sql','text'].map(v=><option key={v}>{v}</option>)}</select><button disabled={!!props.code.trim()||props.language!=='python'} title="仅在代码为空时载入，不替换已有代码" onClick={()=>props.onCodeChange(initial.template)}>载入输入模板</button></div></div>
     {props.language==='python'?<PythonEditor value={props.code} onChange={props.onCodeChange} label="Python ACM 代码"/>:<><textarea aria-label="我的代码" className="other-code" value={props.code} onChange={e=>props.onCodeChange(e.target.value)}/><p className="muted small">当前版本只执行 Python；其他语言的已有代码仍可编辑和保存。</p></>}
     <div className="acm-limits">Python 3.12 · 每组 2 秒 · 256 MiB · 输出上限 64 KiB · stdin → stdout</div>
     <div className="case-toolbar"><h4>自定义测试</h4><span role="status">测试输入：{suite.status}</span><button onClick={()=>suite.update({draft:{...EMPTY_CASE}})}><Plus size={13}/>新建输入</button></div>
-    {initial.builtin_cases.length>0&&<div className="sample-buttons"><span>载入题目样例</span>{initial.builtin_cases.map((c,i)=><button key={c.id} onClick={()=>suite.update({draft:{...c,id:null}})}>样例 {i+1}</button>)}</div>}
+    {initial.builtin_cases.length>0?<div className="sample-buttons"><span>载入本地 ACM 样例 / 边界测试</span>{initial.builtin_cases.map((c,i)=><button key={c.id} onClick={()=>suite.update({draft:{...c,id:null}})}>样例 {i+1}</button>)}</div>:<p className="muted small">暂未配置 ACM 样例。请自行填写标准输入，可设置期望输出或只观察运行结果。</p>}
     <div className="case-options"><label>用例名称<input aria-label="测试名称" value={draft.name} onChange={e=>updateDraft({name:e.target.value})}/></label><label>输出比较<select aria-label="输出比较" value={draft.comparison} onChange={e=>updateDraft({comparison:e.target.value as AcmCase['comparison']})}><option value="tokens">忽略空白差异</option><option value="exact">严格文本（统一换行）</option><option value="unordered_lines">忽略行顺序</option><option value="float">浮点容差 1e-6</option></select></label><label className="expected-toggle"><input type="checkbox" aria-label="校验期望输出" checked={draft.expected_stdout!==null} onChange={e=>updateDraft({expected_stdout:e.target.checked?'':null})}/>校验期望输出</label></div>
     <div className="case-input-grid"><label>标准输入 stdin<textarea aria-label="标准输入 stdin" value={draft.stdin} spellCheck={false} placeholder="在这里填写输入；不需要写 input = 或参数名。" onChange={e=>updateDraft({stdin:e.target.value})}/></label><label>期望输出 stdout<textarea aria-label="期望输出 stdout" disabled={draft.expected_stdout===null} value={draft.expected_stdout??''} spellCheck={false} placeholder={draft.expected_stdout===null?'未启用：只显示运行结果':'允许空输出；不会按空值跳过比较。'} onChange={e=>updateDraft({expected_stdout:e.target.value})}/></label></div>
     <div className="acm-run-actions"><button className="primary" disabled={runDisabled||props.language!=='python'} onClick={()=>void submit(props.code,'custom')}><Play size={15}/>{busy?'运行中…':'运行当前输入'}</button><button disabled={runDisabled||props.language!=='python'||initial.builtin_cases.length+suite.value.cases.length===0} onClick={()=>void submit(props.code,'suite')}>运行全部测试（{initial.builtin_cases.length+suite.value.cases.length}）</button><button onClick={saveCase}><Save size={14}/>保存为测试用例</button></div>

@@ -1,0 +1,56 @@
+.problem-entry{display:flex;align-items:center;gap:8px;min-width:0}
+.compact-app .local-problem-button{border:0;background:none;padding:0;font-size:13px;font-weight:400;justify-content:flex-start;text-align:left;white-space:normal;flex-shrink:1;border-radius:2px}
+.compact-app .local-problem-button:hover{background:none;color:var(--accent)}
+.problem-source-link{display:inline-flex;color:var(--local-muted);padding:5px;flex-shrink:0;border-radius:4px;text-decoration:none}
+.problem-source-link:hover{color:var(--accent);background:var(--local-subtle)}
+.problem-entry>small{font-size:10px;white-space:nowrap}
+.practice-dialog{position:fixed;inset:0;margin:auto;width:90vw;max-width:1600px;height:90dvh;max-height:100dvh;padding:0;border:1px solid var(--local-line);border-radius:12px;background:var(--local-surface);color:var(--ink);box-shadow:0 20px 90px #0003;overflow:hidden}
+.practice-dialog[open]{display:flex;flex-direction:column}
+.practice-body{display:flex;flex-direction:column;flex:1;min-height:0}
+.practice-close-error{margin:0!important;border-radius:0;flex-shrink:0;max-height:25dvh;overflow:auto}
+.practice-dialog::backdrop{background:#17203166}
+.practice-dialog.is-maximized{width:100vw;max-width:100vw;height:100dvh;border-radius:0}
+.practice-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding:18px 24px;border-bottom:1px solid var(--local-line);flex-shrink:0}
+.practice-header h2{font-size:19px;line-height:1.6;margin-top:5px;overflow-wrap:anywhere}
+.practice-window-actions{display:flex;gap:8px}
+.practice-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 24px;border-bottom:1px solid var(--local-line);flex-shrink:0}
+.practice-tabs{display:flex;gap:6px}
+.practice-toolbar .button-link,.practice-tabs button{font-size:12px;padding:7px 12px}
+.practice-tabs button[aria-pressed=true]{background:var(--local-subtle);color:var(--accent);border-color:var(--accent)}
+.practice-tabs .practice-code-tab{display:none}
+.practice-columns{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);flex:1;min-height:0;overflow:hidden}
+.practice-reading,.practice-coding{padding:22px 24px;min-width:0;overflow:auto;overscroll-behavior:contain}
+.practice-reading{border-right:1px solid var(--local-line)}
+.practice-statement-meta{display:flex;gap:12px;align-items:center;font-size:11px}
+.practice-reading .problem-content{font-size:14px;padding:20px 0}
+.practice-statement-hint{font-size:11px;line-height:1.8;border-top:1px solid var(--local-line);padding-top:16px}
+.practice-coding .acm-workspace{padding-top:0}
+.practice-dialog .primary:hover{background:var(--accent)}
+.practice-coding .acm-title .eyebrow{display:none}
+.practice-coding .acm-title h3{margin:0;font-size:16px}
+.practice-coding .acm-title{margin-bottom:16px}
+.practice-coding .case-options{grid-template-columns:1fr 1fr;gap:10px}
+.practice-coding .case-options .expected-toggle{grid-column:1/-1;padding-bottom:0}
+.practice-coding .result-columns{grid-template-columns:1fr}
+.practice-coding .case-input-grid,.practice-coding .contract-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.practice-note-input{width:100%;min-height:360px;resize:vertical;font:13px/1.9 Consolas,'Microsoft YaHei',monospace!important}
+.practice-footer{padding:10px 24px;border-top:1px solid var(--local-line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;flex-shrink:0;max-height:30dvh;overflow:auto}
+.practice-footer>button{padding:6px 10px;font-size:11px}
+.practice-footer .practice-save-error{flex-basis:100%;margin:0!important}
+.practice-loading{padding:24px}
+.runner-setup-hint{margin-bottom:16px;padding:12px;border:1px solid var(--local-line);background:var(--local-subtle);border-radius:6px;font-size:11px;line-height:1.8;overflow-wrap:anywhere}
+.runner-setup-hint code{white-space:normal}
+@media(max-width:800px){
+  .practice-dialog{width:100vw;max-width:100vw;height:100dvh;border-radius:0}
+  .practice-header{padding:14px 16px}.practice-header h2{font-size:16px}
+  .practice-window-actions>button:first-child{display:none}
+  .practice-toolbar{padding:9px 12px;gap:4px}.practice-tabs{gap:4px}
+  .practice-toolbar .button-link,.practice-tabs button{padding:7px 8px;font-size:11px}
+  .practice-tabs .practice-code-tab{display:inline-flex}
+  .practice-columns{grid-template-columns:minmax(0,1fr)}
+  .practice-reading,.practice-coding{padding:18px 16px;border:0}
+  .practice-columns[data-view=code] .practice-reading{display:none}
+  .practice-columns:not([data-view=code]) .practice-coding{display:none}
+  .practice-coding .case-input-grid,.practice-coding .contract-grid{grid-template-columns:1fr}
+  .practice-footer{padding:9px 16px}
+}
