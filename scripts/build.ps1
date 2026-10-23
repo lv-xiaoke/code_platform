@@ -14,7 +14,7 @@ try {
 }
 finally { Pop-Location }
 if (-not (Test-Path -LiteralPath (Join-Path $ReleasePath 'index.html'))) { throw 'Built index.html missing.' }
-$Manifest = @{ path = $ReleaseRelative; built_at = (Get-Date).ToString('o'); version = '1.3.0' } | ConvertTo-Json
+$Manifest = @{ path = $ReleaseRelative; built_at = (Get-Date).ToString('o'); version = '1.4.0' } | ConvertTo-Json
 $PendingManifest = Join-Path $AppRoot ('releases/current-' + $ReleaseName + '.json')
 Set-Content -LiteralPath $PendingManifest -Value $Manifest -Encoding UTF8
 $Current = Join-Path $AppRoot 'releases/current.json'

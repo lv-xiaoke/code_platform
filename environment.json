@@ -1,5 +1,5 @@
 {
-  "app_version": "1.3.0",
+  "app_version": "1.4.0",
   "schema_version": "0002",
   "project_root": "D:\\my_develop\\A_work_program\\code_platform",
   "deployment_path_override": true,
@@ -128,14 +128,22 @@
     "reference_manifest_sha256": "efa494a0fdeda1d559e938f9ebc5f13c6bbc4acdb3befee0b6c31352eacea59d",
     "verified_reference_programs": 50,
     "verified_reference_cases": 152,
-    "verified_at": "2026-10-21"
+    "verified_at": "2026-10-21",
+    "interactive": {
+      "wall_seconds": 300,
+      "cpu_seconds": 3,
+      "max_sessions": 2,
+      "input_limit_bytes": 65536,
+      "output_limit_bytes": 65536,
+      "worker_sha256": "e93be186b1b524544d6a1a69133756cf3f3dc32b96f6eecabe1c4d34b16e62d5"
+    }
   },
   "migrations": {
     "0002_acm_sha256": "b2a6c72a8f5f46b2cb2dc1afb5b07aa9aff663481ac10f19d97a20c3030caedd"
   },
   "interface": {
     "entry": "frontend/src/local/CatalogApp.tsx",
-    "mode": "catalog-and-local-practice",
+    "mode": "catalog-and-interactive-practice",
     "filters": [
       "search",
       "company",

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 
-from .schemas import SuiteWrite, RunWrite
+from .schemas import SuiteWrite, RunWrite, TerminalStart, TerminalInput
 from .service import acm_detail,save_suite
 
 router=APIRouter(prefix='/api/v1')
@@ -28,3 +28,26 @@ def history(pid:str,request:Request): return request.app.state.run_service.histo
 
 @router.get('/runs/{run_id}')
 def result(run_id:str,request:Request): return request.app.state.run_service.get(run_id)
+
+
+@router.post('/problems/{pid}/terminals',status_code=202)
+def terminal_start(pid:str,payload:TerminalStart,request:Request):
+    return request.app.state.terminal_service.start(pid,payload)
+
+
+@router.get('/terminals/{run_id}')
+def terminal_get(run_id:str,request:Request): return request.app.state.terminal_service.get(run_id)
+
+
+@router.post('/terminals/{run_id}/input')
+def terminal_input(run_id:str,payload:TerminalInput,request:Request):
+    return request.app.state.terminal_service.send(run_id,payload)
+
+
+@router.post('/terminals/{run_id}/stop')
+def terminal_stop(run_id:str,request:Request): return request.app.state.terminal_service.stop(run_id)
+
+
+@router.post('/terminal-requests/{request_id}/stop')
+def terminal_cancel_request(request_id:str,request:Request):
+    return request.app.state.terminal_service.stop_request(request_id)

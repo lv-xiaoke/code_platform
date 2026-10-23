@@ -32,6 +32,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             db.migrate()
             from .runner.service import RunService
             app.state.run_service=RunService(db,now)
+            from .runner.terminal import TerminalService
+            app.state.terminal_service=TerminalService(db,now)
             if bootstrap:
                 from sqlalchemy import select, func
                 from .models import datasets
@@ -45,6 +47,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
                 if not any((db.data_dir/'backups').glob(f'*-daily-{today}-*.zip')): create_backup(db, reason=f'daily-{today}')
             yield
         finally:
+            if hasattr(app.state,'terminal_service'): app.state.terminal_service.close()
             if hasattr(app.state,'run_service'): app.state.run_service.close()
             db.engine.dispose()
             if lock: lock.__exit__()

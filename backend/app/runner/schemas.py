@@ -43,3 +43,26 @@ class RunWrite(StrictModel):
         if self.mode=='custom' and not self.cases: raise ValueError('自定义运行至少需要一组输入')
         if self.mode=='suite' and self.cases: raise ValueError('全部测试使用服务器已保存的用例')
         return self
+
+
+class TerminalStart(StrictModel):
+    request_id: str = Field(min_length=1,max_length=128)
+    source_code: str = Field(min_length=1,max_length=200000)
+
+    @model_validator(mode='after')
+    def not_blank(self):
+        if not self.source_code.strip(): raise ValueError('请先编写 Python 代码')
+        return self
+
+
+class TerminalInput(StrictModel):
+    request_id: str = Field(min_length=1,max_length=128)
+    text: str = Field(default='',max_length=65536)
+    eof: bool = False
+
+    @model_validator(mode='after')
+    def valid_input(self):
+        if self.eof and self.text: raise ValueError('结束输入时不能同时发送文本')
+        if not self.eof and not self.text: raise ValueError('请输入内容或发送结束输入')
+        if len(self.text.encode('utf-8'))>65536: raise ValueError('输入不能超过 64 KiB')
+        return self
