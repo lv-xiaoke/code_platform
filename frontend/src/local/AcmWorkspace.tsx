@@ -12,7 +12,7 @@ import {useTerminal} from './useTerminal'
 import {TerminalPanel} from './TerminalPanel'
 import './acm.css'
 
-type Props={problemId:string;code:string;language:string;onCodeChange:(code:string)=>void;onLanguageChange:(language:string)=>void;registerGuard:(guard:(()=>Promise<boolean>)|null)=>void;beforeRun?:()=>Promise<boolean>}
+type Props={problemId:string;code:string;language:string;onCodeChange:(code:string)=>void;onLanguageChange:(language:string)=>void;registerGuard:(guard:(()=>Promise<boolean>)|null)=>void;beforeRun?:()=>Promise<boolean>;onAnalyze?:(runId:string)=>void}
 
 export default function AcmWorkspace(props:Props){
   const acm=useQuery({queryKey:['acm',props.problemId],queryFn:()=>api<AcmData>(`/problems/${props.problemId}/acm`),staleTime:0})
@@ -64,11 +64,12 @@ function AcmContent({initial,...props}:Props&{initial:AcmData}){
     {props.language==='python'?<PythonEditor value={props.code} onChange={props.onCodeChange} label="Python ACM 代码"/>:<><textarea aria-label="我的代码" className="other-code" value={props.code} onChange={e=>props.onCodeChange(e.target.value)}/><p className="muted small">当前版本只执行 Python；其他语言的已有代码仍可编辑和保存。</p></>}
     <p className="quick-code-hint muted">点击运行后，可在下方终端输入并按 Enter。也可以在代码中直接写函数调用、print 或 assert。</p>
     <div className="quick-run-actions"><button className="primary" disabled={runDisabled||props.language!=='python'} onClick={()=>void submit(props.code,'quick')}><Play size={15}/>{busy?'运行中…':'运行'}</button><button aria-expanded={inputOpen} aria-controls={'quick-input-'+props.problemId} onClick={()=>setInputOpen(!inputOpen)}>预设输入<ChevronDown size={13}/></button></div>
-    <div className="quick-input" id={'quick-input-'+props.problemId} hidden={!inputOpen}><label>标准输入（可选）<textarea aria-label="自定义输入" value={draft.stdin} spellCheck={false} placeholder="使用 input() 或 sys.stdin 时，在这里填写输入。" onChange={e=>updateDraft({stdin:e.target.value})}/></label><p className="muted small">只在展开时将这里的文本传给程序；收起后运行使用空输入。直接在代码中写测试调用时无需填写。</p></div>
+    <div className="quick-input" id={'quick-input-'+props.problemId} hidden={!inputOpen}><label>标准输入（可选）<textarea aria-label="自定义输入" value={draft.stdin} spellCheck={false} placeholder="使用 input() 或 sys.stdin 时，在这里填写输入。" onChange={e=>updateDraft({stdin:e.target.value})}/></label><p className="muted small">只在展开时将这里的文本传给程序；收起后运行进入交互终端。直接在代码中写测试调用时无需填写。</p></div>
     {error&&<div className="local-error" role="alert">{error}</div>}
     {suite.error&&<div className="local-error" role="alert">测试保存失败，当前输入保留：{suite.error}<button onClick={()=>void suite.flush()}>重试保存</button><button onClick={()=>{downloadText(`ACM测试草稿-${props.problemId}.json`,JSON.stringify(suite.value,null,2));void suite.reloadServer()}}>导出测试草稿并载入服务器版本</button></div>}
     {showTerminal&&terminal.error&&!terminal.state&&<div className="local-error" role="alert">{terminal.error}</div>}
     {showTerminal&&terminal.starting?<section className="interactive-terminal" aria-label="交互终端"><p role="status">正在启动交互终端…</p></section>:showTerminal&&terminal.state?<TerminalPanel state={terminal.state} sending={terminal.sending} error={terminal.error} onSend={text=>terminal.send(text)} onEof={()=>void terminal.send('',true)} onStop={()=>void terminal.stop()}/>:runId?<RunResults runId={runId}/>:<section className="acm-results console-empty" aria-label="运行结果"><h3>运行结果</h3><p className="muted small">点击运行后，程序输出和终端输入区会显示在这里。</p></section>}
+    {props.onAnalyze&&(showTerminal?terminal.state&&!terminal.busy:active.data&&!['queued','running'].includes(active.data.status))&&<button className="ai-analyze-run" onClick={()=>props.onAnalyze?.(showTerminal?terminal.state!.id:runId!)}>让 AI 分析本次运行</button>}
     <details className="advanced-tests"><summary>高级测试<span>样例 · 期望输出 · 批量运行</span></summary><div className="advanced-tests-body">
     <details className="acm-contract"><summary>本题 ACM 输入输出约定</summary><p className="muted small">{initial.contract_notice}</p>{initial.reference?<div className="contract-grid"><div><h4>输入格式</h4><p>{initial.reference.input_description}</p></div><div><h4>输出格式</h4><p>{initial.reference.output_description}</p></div></div>:<p className="small">自行约定输入格式，使用 input() 或 sys.stdin 读取，并用 print() 输出。可以保存期望输出，或只运行观察结果。</p>}</details>
     <button disabled={!!props.code.trim()||props.language!=='python'} title="仅在代码为空时载入，不替换已有代码" onClick={()=>props.onCodeChange(initial.template)}>载入输入模板</button>

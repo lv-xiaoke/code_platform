@@ -1,5 +1,5 @@
 {
-  "app_version": "1.4.0",
+  "app_version": "1.5.0",
   "schema_version": "0002",
   "project_root": "D:\\my_develop\\A_work_program\\code_platform",
   "deployment_path_override": true,
@@ -158,5 +158,16 @@
     "local_runner_ui": true,
     "schema_migration_required": false,
     "local_statements": 1132
+  },
+  "ai": {
+    "provider": "DeepSeek",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "models": [
+      "deepseek-flash",
+      "deepseek-v4-pro"
+    ],
+    "key_storage": "Windows DPAPI; excluded from SQLite and backups",
+    "max_active": 2,
+    "max_output_tokens": 4096
   }
 }

@@ -34,6 +34,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             app.state.run_service=RunService(db,now)
             from .runner.terminal import TerminalService
             app.state.terminal_service=TerminalService(db,now)
+            from .ai.service import AiService
+            app.state.ai_service=AiService(db,now)
             if bootstrap:
                 from sqlalchemy import select, func
                 from .models import datasets
@@ -47,6 +49,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
                 if not any((db.data_dir/'backups').glob(f'*-daily-{today}-*.zip')): create_backup(db, reason=f'daily-{today}')
             yield
         finally:
+            if hasattr(app.state,'ai_service'): app.state.ai_service.close()
             if hasattr(app.state,'terminal_service'): app.state.terminal_service.close()
             if hasattr(app.state,'run_service'): app.state.run_service.close()
             db.engine.dispose()
@@ -57,6 +60,18 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     app.state.clock = now
     from .runner.routes import router as runner_router
     app.include_router(runner_router)
+    from .ai.routes import router as ai_router
+    app.include_router(ai_router)
+
+    from fastapi.exceptions import RequestValidationError
+    from fastapi.exception_handlers import request_validation_exception_handler
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request, exc):
+        # Pydantic includes rejected input by default; never echo credentials.
+        if request.url.path == '/api/v1/ai/settings':
+            return JSONResponse({'detail':'AI 设置格式无效，请检查 Key 和模型'},status_code=422)
+        return await request_validation_exception_handler(request,exc)
 
     @app.middleware('http')
     async def local_boundary(request: Request, call_next):
