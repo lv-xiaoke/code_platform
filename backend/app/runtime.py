@@ -1,5 +1,7 @@
-"""OS-held lock: released automatically even if the process terminates."""
+"""Track the service lock and the browser tabs that keep it running."""
 import os
+from contextlib import contextmanager
+from time import monotonic
 
 
 class RuntimeLock:
@@ -29,3 +31,29 @@ class RuntimeLock:
 
     def __exit__(self, *args):
         if self.handle: self.handle.close()
+
+
+class BrowserTabs:
+    startup_grace = 60
+    close_grace = 5
+
+    def __init__(self, clock=monotonic):
+        self._clock = clock
+        self._idle_until: float | None = None
+        self._active = 0
+
+    @contextmanager
+    def connected(self):
+        self._active += 1
+        try:
+            yield
+        finally:
+            self._active -= 1
+            if not self._active:
+                self._idle_until = self._clock() + self.close_grace
+
+    def should_stop(self):
+        now = self._clock()
+        if self._idle_until is None:
+            self._idle_until = now + self.startup_grace
+        return not self._active and now >= self._idle_until

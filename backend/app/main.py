@@ -4,8 +4,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 import secrets
+from urllib.parse import urlsplit
 
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Query, Request
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Query, Request, WebSocket
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.exc import OperationalError, IntegrityError
 
@@ -16,6 +17,13 @@ from . import catalog, imports, learning
 from .backups import create_backup
 from .runtime import RuntimeLock
 from .scheduler import TZ
+
+
+def is_loopback_host(host: str) -> bool:
+    try:
+        return urlsplit('http://'+host).hostname in ('127.0.0.1', 'localhost', '::1')
+    except ValueError:
+        return False
 
 
 def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
@@ -58,6 +66,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     app = FastAPI(title='CodeTop Local', version=__version__, lifespan=lifespan)
     app.state.db = db
     app.state.clock = now
+    app.state.browser_tabs = None
     from .runner.routes import router as runner_router
     app.include_router(runner_router)
     from .ai.routes import router as ai_router
@@ -75,11 +84,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
 
     @app.middleware('http')
     async def local_boundary(request: Request, call_next):
-        from urllib.parse import urlsplit
         host = request.headers.get('host', '')
-        try: hostname = urlsplit('http://'+host).hostname
-        except ValueError: hostname = ''
-        if hostname not in ('127.0.0.1', 'localhost', '[::1]', '::1'):
+        if not is_loopback_host(host):
             return JSONResponse({'detail':'只接受本机回环地址'}, status_code=403)
         if request.method not in ('GET', 'HEAD', 'OPTIONS'):
             origin = request.headers.get('origin')
@@ -91,9 +97,9 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'same-origin'
         response.headers['X-Frame-Options'] = 'DENY'
-        if request.url.path.startswith('/api/'):
+        if request.url.path.startswith('/api/') or response.headers.get('Content-Type', '').startswith('text/html'):
             response.headers['Cache-Control'] = 'no-store'
-        else:
+        if not request.url.path.startswith('/api/'):
             response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
         return response
 
@@ -113,6 +119,22 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
 
     @app.get('/api/v1/session')
     def session(): return {'token':token}
+
+    @app.websocket('/api/v1/browser-tab')
+    async def browser_tab(socket: WebSocket):
+        host = socket.headers.get('host', '')
+        if not is_loopback_host(host) or socket.headers.get('origin') != f'http://{host}':
+            await socket.close(code=1008)
+            return
+        tabs = app.state.browser_tabs
+        if tabs is None:
+            await socket.accept()
+            await socket.close()
+            return
+        with tabs.connected():
+            await socket.accept()
+            while (await socket.receive())['type'] != 'websocket.disconnect':
+                pass
 
     @app.get('/api/v1/catalog/datasets')
     def datasets(): return catalog.list_datasets(db)
