@@ -14,7 +14,7 @@ from . import __version__
 from .runtime import RuntimeLock
 
 COUNT_TABLES = ('problems', 'catalog_entries', 'notes', 'practice_logs', 'study_state', 'source_datasets')
-SUPPORTED_SCHEMAS = ('0001', '0002')
+SUPPORTED_SCHEMAS = ('0001', '0002', '0003')
 
 
 def digest(path):
@@ -28,7 +28,8 @@ def inspect_database(path):
         if conn.execute('PRAGMA foreign_key_check').fetchone(): raise ValueError('数据库外键校验失败')
         row = conn.execute('SELECT version_num FROM alembic_version').fetchone()
         if not row or row[0] not in SUPPORTED_SCHEMAS: raise ValueError('备份数据库结构版本不兼容')
-        tables = COUNT_TABLES + (('problem_test_suites', 'code_runs') if row[0]=='0002' else ())
+        tables = COUNT_TABLES + (('problem_test_suites', 'code_runs') if row[0] in ('0002', '0003') else ())
+        if row[0] == '0003': tables += ('code_history',)
         counts = {name:conn.execute(f'SELECT count(*) FROM {name}').fetchone()[0] for name in tables}
         sources = {row[0] for row in conn.execute('SELECT sha256 FROM source_datasets UNION SELECT sha256 FROM import_previews')}
     return counts, sources

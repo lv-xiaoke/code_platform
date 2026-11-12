@@ -11,7 +11,7 @@ from sqlalchemy.exc import OperationalError, IntegrityError
 
 from . import __version__
 from .db import Database, ROOT, SCHEMA_VERSION
-from .schemas import NoteWrite, StateWrite, AttemptWrite
+from .schemas import NoteWrite, StateWrite, AttemptWrite, CodeRewrite
 from . import catalog, imports, learning
 from .backups import create_backup
 from .runtime import RuntimeLock
@@ -135,6 +135,12 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
 
     @app.patch('/api/v1/problems/{pid}/state')
     def state(pid:str, payload:StateWrite): return learning.patch_state(db,pid,payload,now())
+
+    @app.get('/api/v1/problems/{pid}/code/history')
+    def code_history(pid:str): return learning.get_code_history(db,pid)
+
+    @app.post('/api/v1/problems/{pid}/code/rewrite')
+    def code_rewrite(pid:str, payload:CodeRewrite): return learning.rewrite_code(db,pid,payload,now())
 
     @app.post('/api/v1/problems/{pid}/attempts')
     def attempt(pid:str,payload:AttemptWrite): return learning.record_attempt(db,pid,payload,now())

@@ -83,9 +83,6 @@
 .note-autosave-hint{font-size:11px;margin-top:11px!important;line-height:1.7}
 .simple-note-preview{min-height:360px;border:1px solid var(--local-line);border-radius:6px;padding:18px;font-size:14px;line-height:1.9;overflow-wrap:anywhere}
 .simple-note-preview .markdown-preview{padding:0;background:none;border:0;max-height:none;overflow:visible}
-.reference-section .acm-reference{margin-top:25px}
-.reference-section .reference-body h4{font-size:13px;margin-bottom:9px}
-.reference-section .acm-reference-empty{font-size:12px;padding:14px;margin-top:25px}
 .compact-app .data-panel{font-size:13px}
 .compact-app .data-panel h2{font-size:21px;margin:0}
 :root[data-theme=dark] .compact-app .d1{background:#243e35;color:#8dc9ac}

@@ -7,7 +7,7 @@ from alembic.config import Config
 from sqlalchemy import create_engine, event
 
 ROOT = Path(__file__).resolve().parents[2]
-SCHEMA_VERSION = '0002'
+SCHEMA_VERSION = '0003'
 
 
 class Database:

@@ -80,8 +80,7 @@ class RunService:
                     if old['request_hash']!=request_hash: raise HTTPException(409,'此请求编号已用于不同的代码或测试')
                     return run_dict(old)
                 if payload.mode=='suite':
-                    ref=reference_for(conn,pid)
-                    cases=[*(ref['cases'] if ref else []),*suite_for(conn,pid)['cases']]
+                    cases=suite_for(conn,pid)['cases']
                 else: cases=[case.model_dump() for case in payload.cases]
                 if not cases: raise HTTPException(422,'本题没有已保存测试，请先添加自定义测试')
                 if len(cases)>20: raise HTTPException(422,'全部测试超过 20 组，请减少自定义测试')

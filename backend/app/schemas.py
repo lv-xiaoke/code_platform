@@ -13,6 +13,11 @@ class NoteWrite(StrictModel):
     language: str = Field(default='python', max_length=50)
 
 
+class CodeRewrite(StrictModel):
+    revision: int = Field(ge=0)
+    history_id: int | None = Field(default=None, gt=0)
+
+
 class StateWrite(StrictModel):
     revision: int = Field(ge=0)
     done: bool | None = None

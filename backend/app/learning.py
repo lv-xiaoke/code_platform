@@ -70,6 +70,38 @@ def put_note(db, pid, payload, now):
     return result
 
 
+def get_code_history(db, pid):
+    with db.engine.connect() as conn:
+        require_problem(conn, pid)
+        return [dict(row) for row in conn.execute(select(m.code_history).where(
+            m.code_history.c.problem_id == pid).order_by(m.code_history.c.id.desc())).mappings()]
+
+
+def rewrite_code(db, pid, payload, now):
+    with db.write() as conn:
+        require_problem(conn, pid)
+        old = get_note(conn, pid)
+        if payload.revision != old['revision']:
+            raise HTTPException(409, '代码已在其他页面更新，当前草稿仍保留；请导出后载入服务器版本。')
+        target = None
+        if payload.history_id is not None:
+            target = conn.execute(select(m.code_history).where(
+                m.code_history.c.id == payload.history_id,
+                m.code_history.c.problem_id == pid)).mappings().first()
+            if target is None: raise HTTPException(404, '历史代码不存在')
+        if old['code_text'].strip():
+            conn.execute(insert(m.code_history).values(problem_id=pid, code_text=old['code_text'],
+                language=old['language'], created_at=utc_text(now)))
+        result = {**old, 'code_text': target['code_text'] if target else '',
+                  'language': target['language'] if target else old['language'],
+                  'revision': old['revision'] + 1, 'updated_at': utc_text(now)}
+        if old['revision']:
+            conn.execute(update(m.notes).where(m.notes.c.problem_id == pid).values(**result))
+        else:
+            conn.execute(insert(m.notes).values(**result))
+    return result
+
+
 def patch_state(db, pid, payload, now):
     with db.write() as conn:
         require_problem(conn, pid)

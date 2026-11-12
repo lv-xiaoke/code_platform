@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sqlalchemy import select
 
-from app.db import Database
+from app.db import Database, SCHEMA_VERSION
 from app.backups import restore_backup
 
 
@@ -27,7 +27,7 @@ def test_upgrade_0001_preserves_note_and_restorable_backup(tmp_path):
     db=Database(path)
     db.migrate()
     with db.engine.connect() as conn:
-        assert conn.exec_driver_sql('SELECT version_num FROM alembic_version').scalar()=='0002'
+        assert conn.exec_driver_sql('SELECT version_num FROM alembic_version').scalar()==SCHEMA_VERSION
         assert conn.exec_driver_sql('SELECT body_md,code_text,revision FROM notes').one()==('old personal note','print(42)',7)
         assert conn.exec_driver_sql('SELECT count(*) FROM problem_test_suites').scalar()==0
         assert conn.exec_driver_sql('SELECT count(*) FROM code_runs').scalar()==0
@@ -42,6 +42,6 @@ def test_upgrade_0001_preserves_note_and_restorable_backup(tmp_path):
     recovered.migrate()
     with recovered.engine.connect() as conn:
         assert conn.exec_driver_sql('SELECT revision FROM notes').scalar()==7
-        assert conn.exec_driver_sql('SELECT version_num FROM alembic_version').scalar()=='0002'
+        assert conn.exec_driver_sql('SELECT version_num FROM alembic_version').scalar()==SCHEMA_VERSION
     recovered.engine.dispose()
     db.engine.dispose()

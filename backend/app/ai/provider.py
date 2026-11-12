@@ -1,7 +1,9 @@
 import json
+import os
 import time
-from urllib.request import Request, build_opener, HTTPRedirectHandler
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener, getproxies
 
 ENDPOINT = 'https://api.deepseek.com/chat/completions'
 
@@ -21,7 +23,13 @@ class DeepSeekProvider:
         request = Request(ENDPOINT,data=body,headers={'Content-Type':'application/json','Authorization':'Bearer '+key})
         started = time.monotonic()
         try:
-            with build_opener(NoRedirect()).open(request,timeout=15) as response:
+            proxies = getproxies()
+            https_proxy = proxies.get('https')
+            # Bypass Windows loopback proxies unless the backend explicitly opted in.
+            if (os.name == 'nt' and https_proxy and not os.environ.get('HTTPS_PROXY')
+                    and urlsplit(https_proxy).hostname in ('localhost', '127.0.0.1', '::1')):
+                proxies = {}
+            with build_opener(ProxyHandler(proxies), NoRedirect()).open(request,timeout=15) as response:
                 while not stop.is_set():
                     if time.monotonic()-started > 120: raise ProviderError('回答时间较长，已停止。可以缩短问题后重试。')
                     line = response.readline(1024*1024+1)

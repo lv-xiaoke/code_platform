@@ -62,13 +62,31 @@ def test_jobs_idempotency_history_backup_and_no_study_changes(loaded,tmp_path):
     assert counts['code_runs']==1
 
 
-def test_run_validation_and_suite_execution(loaded):
+def test_suite_runs_only_saved_custom_cases(loaded):
     c,app,_,pid=loaded
     app.state.run_service.runner=FakeRunner()
+    suite_url=f'/api/v1/problems/{pid}/test-cases'
+    run_url=f'/api/v1/problems/{pid}/runs'
     base={'request_id':str(uuid4()),'source_code':'print(0)','mode':'suite'}
-    r=c.post(f'/api/v1/problems/{pid}/runs',json=base)
+    assert c.post(run_url,json=base).status_code==422
+    cases=[
+        {'id':'first','name':'空输入','stdin':'','expected_stdout':'','comparison':'exact'},
+        {'id':'second','name':'多行输入','stdin':'1\n2\n','expected_stdout':None,'comparison':'tokens'},
+    ]
+    draft={**cases[0],'stdin':'还未保存的编辑'}
+    saved=c.put(suite_url,json={'revision':0,'cases':cases,'draft':draft})
+    assert saved.status_code==200,saved.text
+    assert c.get(f'/api/v1/problems/{pid}/acm').json()['cases']==cases
+    r=c.post(run_url,json=base)
     assert r.status_code==202,r.text
-    assert len(wait(c,r.json()['id'])['results'])>=3
+    result=wait(c,r.json()['id'])
+    assert result['cases']==cases
+    assert len(result['results'])==2
+
+
+def test_run_validation(loaded):
+    c,_,_,pid=loaded
+    base={'request_id':str(uuid4()),'source_code':'print(0)','mode':'suite'}
     for bad in [dict(base,request_id=str(uuid4()),language='javascript'),dict(base,request_id=str(uuid4()),mode='custom',cases=[]),dict(base,request_id=str(uuid4()),source_code='')]:
         assert c.post(f'/api/v1/problems/{pid}/runs',json=bad).status_code==422
     assert c.post('/api/v1/problems/missing/runs',json=base).status_code==404

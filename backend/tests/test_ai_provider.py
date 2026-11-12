@@ -1,9 +1,41 @@
 import json
+import os
 import threading
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
+from urllib.response import addinfourl
 
 import pytest
 from app.ai import provider
+
+
+@pytest.mark.skipif(os.name != 'nt', reason='Windows system proxy')
+@pytest.mark.parametrize(('system_proxy', 'explicit_proxy', 'expected_host'), [
+    ('http://127.0.0.1:7877', None, 'api.deepseek.com'),
+    ('http://[::1]:7877', None, 'api.deepseek.com'),
+    ('http://127.0.0.1:7877', 'http://127.0.0.1:8899', '127.0.0.1:8899'),
+    ('http://proxy.example:8080', None, 'proxy.example:8080'),
+])
+def test_deepseek_proxy_routing(monkeypatch, system_proxy, explicit_proxy, expected_host):
+    for name in os.environ:
+        if name.lower().endswith('_proxy'):
+            monkeypatch.delenv(name)
+    if explicit_proxy:
+        monkeypatch.setenv('HTTPS_PROXY', explicit_proxy)
+    monkeypatch.setattr(urllib.request, 'getproxies_registry', lambda: {'https': system_proxy})
+    monkeypatch.setattr(urllib.request, 'proxy_bypass_registry', lambda host: False)
+
+    def respond(handler, request):
+        assert request.host == expected_host
+        body = BytesIO(b'data: {"choices":[{"delta":{"content":"OK"}}]}\n\ndata: [DONE]\n\n')
+        response = addinfourl(body, {}, request.full_url, 200)
+        response.msg = 'OK'
+        return response
+
+    monkeypatch.setattr(urllib.request.HTTPSHandler, 'https_open', respond)
+    reply = provider.DeepSeekProvider().stream('sk-test', 'deepseek-flash', [], threading.Event())
+    assert ''.join(reply) == 'OK'
 
 
 def test_real_http_stream_unicode_and_redacted_errors(monkeypatch):

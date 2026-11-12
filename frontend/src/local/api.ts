@@ -1,5 +1,6 @@
 export type StudyState = {problem_id:string;mastery:number;favorite:boolean;review_enabled:boolean;review_step:number;next_review_date:string|null;revision:number;updated_at:string;done?:boolean}
 export type Note = {body_md:string;code_text:string;language:string;revision:number;updated_at:string}
+export type CodeVersion = {id:number;problem_id:string;code_text:string;language:string;created_at:string}
 export type Problem = {id:string;dataset_id:string;display_id:string;title:string;difficulty:1|2|3;frequency:number|null;last_seen:string|null;url:string|null;mastery:number;favorite:boolean;done:boolean;state_revision:number;has_note:boolean;next_review_date:string|null;review_enabled:boolean}
 export type Detail = Problem & {content_html:string|null;source_name:string;generated_at:string|null;imported_at:string;state:StudyState;note:Note;attempts:{id:string;practiced_at:string;outcome:string;duration_seconds:number|null}[]}
 export type ProblemList = {items:Problem[];count:number;ranking_scope:string;scope_label:string;window_key:string;frequency_kind:string;source_generated_at:string|null;dataset_id:string}

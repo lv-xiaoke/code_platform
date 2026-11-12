@@ -55,6 +55,12 @@ notes = Table('notes', metadata,
     Column('problem_id', String, ForeignKey('problems.id'), primary_key=True),
     Column('body_md', Text, nullable=False), Column('code_text', Text, nullable=False),
     Column('language', String, nullable=False), Column('revision', Integer, nullable=False), Column('updated_at', String, nullable=False))
+code_history = Table('code_history', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('problem_id', String, ForeignKey('problems.id'), nullable=False),
+    Column('code_text', Text, nullable=False), Column('language', String, nullable=False),
+    Column('created_at', String, nullable=False))
+Index('ix_code_history_problem', code_history.c.problem_id, code_history.c.id)
 settings = Table('settings', metadata, Column('key', String, primary_key=True), Column('value_json', Text, nullable=False))
 previews = Table('import_previews', metadata,
     Column('id', String, primary_key=True), Column('source_name', String, nullable=False), Column('sha256', String, nullable=False),
