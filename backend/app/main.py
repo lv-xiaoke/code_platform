@@ -115,7 +115,9 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     async def conflict(_, exc): return JSONResponse({'detail':'数据约束冲突，事务已回滚'}, status_code=409)
 
     @app.get('/api/v1/health')
-    def health(): return {'app':'codetop-local', 'version':__version__, 'schema_version':SCHEMA_VERSION, 'data_dir':str(db.data_dir), 'root':str(root), 'process_id':os.getpid()}
+    def health():
+        # Windows PowerShell 5 otherwise decodes non-ASCII install paths as ANSI.
+        return JSONResponse({'app':'codetop-local', 'version':__version__, 'schema_version':SCHEMA_VERSION, 'data_dir':str(db.data_dir), 'root':str(root), 'process_id':os.getpid()}, media_type='application/json; charset=utf-8')
 
     @app.get('/api/v1/session')
     def session(): return {'token':token}

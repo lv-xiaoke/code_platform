@@ -5,8 +5,19 @@ frontend/node_modules/
 frontend/dist/
 tools/node_modules/
 tools/python/
-data/
-releases/
-runtime/
+/data/
+/releases/
+/runtime/
+/dist/
+# Keep only the canonical catalog; upstream copies stay local.
+/frontend/public/data/
+/vendor/algoTop-64d624feee3fbec0dc67dd58f0cf8874ecdc6e1b/public/data/
+.env
+.env.local
+.env.*.local
+*.dpapi
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
 vendor/*.zip
 *.log
