@@ -5,8 +5,8 @@ from time import monotonic
 
 
 class RuntimeLock:
-    def __init__(self, data_dir):
-        self.path = data_dir / 'service.lock'
+    def __init__(self, data_dir, filename='service.lock'):
+        self.path = data_dir / filename
         self.handle = None
 
     def __enter__(self):

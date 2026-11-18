@@ -9,7 +9,8 @@ from sqlalchemy import select, insert, update
 
 from .. import models as m
 from ..learning import require_problem, utc_text
-from .docker import DockerRunner
+from .factory import create_runner
+from .consent import require_native_consent
 from .references import reference_for, GENERIC_TEMPLATE
 
 
@@ -59,16 +60,18 @@ def run_dict(row,detail=False):
 class RunService:
     def __init__(self,db,clock):
         self.db,self.clock=db,clock
-        self.runner=DockerRunner(db.data_dir/'runs')
+        self.runner=create_runner(db.data_dir/'runs')
         self.pool=ThreadPoolExecutor(max_workers=2,thread_name_prefix='codetop-run')
         self.capacity=threading.BoundedSemaphore(8)
         with db.write() as conn:
             conn.execute(update(m.runs).where(m.runs.c.status.in_(['queued','running'])).values(status='interrupted',error='上次服务已停止，任务未完成；请重新运行。',finished_at=utc_text(clock())))
 
     def close(self):
+        if hasattr(self.runner, 'close'): self.runner.close()
         self.pool.shutdown(wait=True)
 
     def submit(self,pid,payload):
+        require_native_consent(self.db.data_dir, self.runner)
         canonical=json.dumps({'problem_id':pid,**payload.model_dump(exclude={'request_id'})},ensure_ascii=False,sort_keys=True)
         request_hash=hashlib.sha256(canonical.encode()).hexdigest()
         reserved=False

@@ -6,13 +6,15 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, event
 
-ROOT = Path(__file__).resolve().parents[2]
+from .paths import application_root, default_data_dir
+
+ROOT = application_root()
 SCHEMA_VERSION = '0003'
 
 
 class Database:
     def __init__(self, data_dir=None):
-        self.data_dir = Path(data_dir or ROOT / 'data').resolve()
+        self.data_dir = Path(data_dir or default_data_dir()).resolve()
         self.data_dir.mkdir(parents=True, exist_ok=True)
         for directory in ['sources', 'backups', 'staging']:
             (self.data_dir / directory).mkdir(exist_ok=True)

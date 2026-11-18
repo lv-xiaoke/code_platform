@@ -2,12 +2,34 @@ from fastapi import APIRouter, Request
 
 from .schemas import SuiteWrite, RunWrite, TerminalStart, TerminalInput
 from .service import acm_detail,save_suite
+from .consent import consent_status, accept_native_execution
+from pydantic import BaseModel
+from typing import Literal
 
 router=APIRouter(prefix='/api/v1')
 
 
 @router.get('/runner/health')
-def health(request:Request): return request.app.state.run_service.runner.health()
+def health(request:Request):
+    runner = request.app.state.run_service.runner
+    result = runner.health()
+    kind = getattr(runner, 'kind', 'docker')
+    return {**result, 'kind': kind, 'label': '本机 Python' if kind == 'native' else 'Docker',
+            'consent_required': kind == 'native' and not consent_status(request.app.state.db.data_dir)}
+
+
+class ConsentWrite(BaseModel):
+    accepted: Literal[True]
+
+
+@router.get('/runner/consent')
+def consent(request: Request):
+    return {'accepted': consent_status(request.app.state.db.data_dir)}
+
+
+@router.post('/runner/consent')
+def accept(payload: ConsentWrite, request: Request):
+    return accept_native_execution(request.app.state.db.data_dir)
 
 
 @router.get('/problems/{pid}/acm')

@@ -11,7 +11,8 @@ from sqlalchemy import select, insert, update
 
 from .. import models as m
 from ..learning import require_problem, utc_text
-from .terminal_docker import InteractiveDockerRunner
+from .factory import create_runner
+from .consent import require_native_consent
 
 LIMIT=65536
 ACTIVE={'starting','running','stopping'}
@@ -81,13 +82,14 @@ class TerminalSession:
 class TerminalService:
     def __init__(self,db,clock):
         self.db,self.clock=db,clock
-        self.runner=InteractiveDockerRunner(db.data_dir/'runs')
+        self.runner=create_runner(db.data_dir/'runs', interactive=True)
         self.lock=threading.RLock()
         self.sessions={}
         self.cancelled=OrderedDict()
         self.closed=False
 
     def start(self,pid,payload):
+        require_native_consent(self.db.data_dir, self.runner)
         signature=digest({'mode':'interactive','problem_id':pid,'source_code':payload.source_code})
         with self.lock:
             if self.closed: raise HTTPException(503,'服务正在停止')
@@ -183,6 +185,7 @@ class TerminalService:
         return self.stop(run_id) if run_id else {'status':'not_started'}
 
     def close(self):
+        if hasattr(self.runner, 'close'): self.runner.close()
         with self.lock:
             self.closed=True
             sessions=list(self.sessions.values())

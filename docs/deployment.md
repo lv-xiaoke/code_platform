@@ -4,10 +4,18 @@ CodeTop Local 当前验证目标是 Windows 10 / 11 x64 的个人本机使用。
 
 ## 安装前需要什么
 
+**v1.6.0 完整桌面版**：Windows x64 和现代浏览器，下载 `CodeTop-Setup-1.6.0-windows-x64.exe`，双击完成中文安装向导，然后点击桌面“CodeTop 刷题”。内置 Python、依赖与题库，无需 uv、Node、Docker、WSL 或安装时联网。第一次运行代码需确认本机文件与网络访问说明；运行限制不等于隔离沙箱。
+
+桌面版数据、备份与日志位于 `%LOCALAPPDATA%\CodeTopLocal`，程序文件默认位于 `%LOCALAPPDATA%\Programs\CodeTopLocal`。设置中提供完整备份恢复入口，自动校验、先备份再恢复并重启，失败时保留原数据。AI Key 不随备份迁移。
+
+**下表及后续脚本安装步骤对应旧体验 ZIP 和源码方式**，不适用于完整桌面安装包：
+
 | 安装方式 | 首次准备 | 日常启动 |
 | --- | --- | --- |
 | Windows 体验包 | uv、网络；脚本准备 Python 3.12 与后端依赖 | 双击 Start-CodeTop.cmd |
 | 源码 | uv、Node.js/npm、网络；Git 或源码 ZIP | 同上 |
+
+**两种安装方式要运行练习代码，都必须额外安装并启动 Docker Desktop，使用 Linux 容器并准备项目指定镜像。** 仅浏览题库、记录笔记或编辑代码时无需 Docker；应用后端的 Python 环境不替代 Docker 运行环境。
 
 先运行 `uv --version`：能显示版本号说明已安装，无需重复安装。提示找不到命令时，可参考 [官方安装文档](https://docs.astral.sh/uv/getting-started/installation/)，WinGet 命令为 `winget install --id=astral-sh.uv -e`。安装完成后重新打开终端，运行 `uv --version` 确认 PATH 生效。Python 3.12 由 uv 按需获取。
 
@@ -37,15 +45,15 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Bui
 
 安装过程不会重置已有题库和学习记录。看到 `Setup complete` 后双击 `Start-CodeTop.cmd`。浏览器打开 `http://127.0.0.1:8000`，默认显示内置题单。
 
-## 可选的 Python 运行环境
+## Python 代码运行环境（运行代码必需）
 
-安装 Docker Desktop，启动后切换到 Linux 容器，再执行：
+按 [Docker Desktop Windows 官方安装说明](https://docs.docker.com/desktop/setup/install/windows-install/)完成安装及所需系统配置。已经安装的用户无需重复安装，打开 Docker Desktop 并等待引擎启动，确认使用 Linux 容器：`docker version` 应显示 Client 和 Server，`docker info --format '{{.OSType}}'` 应返回 `linux`。然后在项目根目录执行：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-runner.ps1
 ```
 
-该命令拉取 `backend/runner/runtime.json` 指定的固定 Python 镜像。不需要把整个 CodeTop 放进 Docker。不运行代码时无需 Docker，读题、编辑代码和保存笔记仍可用。
+该命令拉取 `backend/runner/runtime.json` 指定的固定 Python 镜像，首次下载需要网络。看到 `Python ACM runner image is ready` 后，刷新练习面板，确认“Docker 已就绪”再运行代码。每次运行代码时都要保持 Docker Desktop 启动，镜像已准备好后无需每次重复下载。不运行代码时无需 Docker，读题、编辑代码和保存笔记仍可用。
 
 运行区要求完整 Python ACM 程序。`input()` 可在终端等待输入；`sys.stdin.read()` 需要点击“结束输入”。运行和高级测试的详细说明见[使用手册](user-guide.md#日常使用)。
 
@@ -136,3 +144,16 @@ Get-FileHash -Algorithm SHA256 -LiteralPath ".\CodeTop-Local-Windows-实际文�
 将结果与旁边 `.sha256` 文件中的值比较。发布前从 ZIP 解压到新目录，运行 Setup 和 Start，确认题单与可选功能说明一致。将 ZIP 和校验文件上传到仓库 Releases；本地生成不等于已上传发布。
 
 构建、安装、测试和打包脚本均不提供批量清理功能；旧构建、测试目录、备份和输出产物保留，按需由维护者手动管理。
+
+## 维护者构建完整桌面安装包
+
+最终用户不需要构建工具。维护者需要已完成的源码环境，以及独立的 `runtime/desktop-work/build-env` 构建虚拟环境。按 `packaging/build-requirements.lock.txt` 安装构建依赖；Python 基础运行时固定为 3.12.13，PyInstaller 固定为 6.22.3。
+
+安装器编译器使用官方 Inno Setup 7.1.1 x64，保存在 `runtime/desktop-work/inno/ISCC.exe`，原安装文件保存在 `runtime/desktop-work/innosetup-7.1.1-x64.exe`。构建脚本核对其官方 SHA256。Python 标准库和二进制文件的逐文件哈希保存在 `packaging/runtime-lock.json`；更换工具或运行时需先审阅并更新锁文件，不接受静默版本漂移。
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-desktop.ps1
+```
+
+每次使用全新的 `runtime/desktop-build-*` 目录构建，在 `dist/desktop-*/` 输出 EXE 和 SHA256。旧构建保留。安装包包含许可说明和逐文件分发清单，不包含学习数据库、Key、首次运行确认记录、开发环境和日志。验收应从实际安装后的程序或快捷方式进行，不能仅以源码测试或 EXE 构建成功代替安装验证。

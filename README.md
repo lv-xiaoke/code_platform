@@ -34,7 +34,34 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
 
 当前部署面向 **Windows 10 / 11 x64**，使用现代浏览器。不需要单独安装数据库。
 
-### 方式一：Windows 体验包（推荐）
+### 推荐：完整桌面安装包（v1.6.0，免 Docker）
+
+1. 下载维护者提供的 **`CodeTop-Setup-1.6.0-windows-x64.exe`**。
+2. 双击安装，按中文向导完成安装，保留“创建桌面快捷方式”。
+3. 双击桌面的 **CodeTop 刷题**，自动打开刷题页面，即可读题、写代码、运行 Python。
+
+**桌面安装包内置 Python、应用依赖和题库，无需安装 uv、Python、Node、Docker 或 WSL，也不需要首次下载依赖。** 已安装完成后，本地题库与代码运行可离线使用。AI 助教仍需自行配置 DeepSeek Key 并联网。
+
+第一次运行代码会提示：程序将在你的电脑上执行，可访问当前用户的文件与网络，请只运行你信任的代码。确认后才会启动，之后不重复提示。本机运行有超时、内存、进程与输出限制，但不提供 Docker 的文件、网络隔离。
+
+学习数据保存在 `%LOCALAPPDATA%\CodeTopLocal`，与安装目录分开。升级保留记录；旧版用户可在旧程序中导出完整备份，在桌面版“设置 → 恢复完整备份”中选择 ZIP 校验并恢复。
+
+本轮桌面安装包先在本地 `dist/desktop-*/` 交付，上传后才会出现在 [Releases 页面](https://github.com/lv-xiaoke/code_platform/releases)。之前发布的 **v1.5.0 Windows ZIP 是下面的旧体验包方式，运行代码仍需 Docker**。
+
+### 旧体验包与源码方式的环境要求
+
+以下说明适用于 **v1.5.0 旧体验 ZIP 和默认 Docker 源码模式**：运行 Python 代码、交互终端或自定义样例时，需要 Docker Desktop 的 Linux 容器及指定运行镜像。v1.6.0 完整桌面安装包无需这些准备。
+
+| 使用场景 | 需要准备什么 |
+| --- | --- |
+| 体验包安装，使用题库、题面、笔记、进度、收藏和代码编辑 | Windows x64、现代浏览器、uv；首次安装需要网络 |
+| 从源码安装 | 上述环境，加 Node.js（含 npm）；通过 Git 克隆时另需 Git |
+| 在项目里运行 Python 代码、交互输入或自定义样例测试 | **Docker Desktop 已安装且正在运行、Linux 容器引擎、项目指定的 Python 镜像**，具体步骤见下方“准备 Python 代码运行环境” |
+| AI 助教 | 自己的 DeepSeek API Key、可用账户和网络 |
+
+已经安装 uv 或 Docker Desktop 的用户无需重复安装。`Setup-CodeTop.cmd` 会准备应用后端的 Python 3.12 环境；**这不能代替运行练习代码所需的 Docker 环境**。只安装本机 Python，也不能直接启用本项目的代码运行功能。
+
+### 旧方式一：Windows 体验 ZIP
 
 1. 从仓库的 [Releases 页面](https://github.com/lv-xiaoke/code_platform/releases)下载 `CodeTop-Local-Windows-*.zip`，完整解压到你准备长期保存的目录，例如 `D:\Apps\CodeTop-Local`。请选择这个体验包；GitHub 自动生成的 `Source code.zip` 是下面的源码方式。若尚无发行附件，可先按方式二安装。
 2. 打开 PowerShell，先运行 `uv --version`。如果能看到版本号，说明已安装，直接进入第 3 步；只有提示找不到命令时，才需要安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)。可运行官方提供的 WinGet 安装命令：
@@ -44,12 +71,12 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
    ```
 
    安装后重新打开终端。无需自己安装 Python，安装脚本会通过 uv 准备 Python 3.12。
-3. 双击解压目录中的 **`Setup-CodeTop.cmd`**，等待依赖安装和题库初始化完成。首次安装需要网络；体验包已带前端页面，无需 Node、npm、Bun 或 Docker。
+3. 双击解压目录中的 **`Setup-CodeTop.cmd`**，等待依赖安装和题库初始化完成。首次安装需要网络；体验包已带前端页面，无需 Node、npm 或 Bun。此步骤准备基础应用；**运行练习代码还需要下面的 Docker 配置**。
 4. 双击 **`Start-CodeTop.cmd`**，浏览器会打开 [http://127.0.0.1:8000](http://127.0.0.1:8000)。看到题单即可开始使用。
 
-以后只需双击 `Start-CodeTop.cmd`。关闭最后一个 CodeTop 标签页后，服务约 5 秒内退出。
+以后只需双击 `Start-CodeTop.cmd`。如果要运行练习代码，请同时保持 Docker Desktop 运行。关闭最后一个 CodeTop 标签页后，CodeTop 本地服务约 5 秒内退出。
 
-### 方式二：从源码安装
+### 方式二：从源码安装（开发者）
 
 需要 **uv、Node.js（含 npm）**；克隆仓库需要 Git，也可以下载源码 ZIP 后解压。
 
@@ -60,7 +87,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Bui
 .\Start-CodeTop.cmd
 ```
 
-脚本创建项目专用 Python 3.12 环境，按锁文件安装依赖、导入内置题库并构建前端。首次准备好之后，日常启动无需再运行 Node 或 Bun。
+脚本创建项目专用 Python 3.12 环境，按锁文件安装依赖、导入内置题库并构建前端。首次准备好之后，日常启动无需再运行 Node 或 Bun。**源码安装同样不会自动安装 Docker 或准备练习运行镜像**；要运行代码，请继续完成下面的配置。
+
+维护者可显式切换本机执行：先设置 `$env:CODETOP_RUNNER='native'`，再启动；源码默认仍为 Docker。普通用户使用完整桌面安装包即可。
 
 ### 按需开启更多能力
 
@@ -70,11 +99,23 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Bui
 | 运行 Python、交互输入和自定义样例测试 | 安装并启动 Docker Desktop（Linux 容器），执行下方命令准备运行镜像 |
 | AI 助教 | 在页面“设置 → AI 设置”填写自己的 DeepSeek API Key，保存并测试连接 |
 
+#### 准备 Python 代码运行环境（运行代码必需）
+
+1. 按 [Docker Desktop Windows 官方安装说明](https://docs.docker.com/desktop/setup/install/windows-install/)安装，并完成所需的 WSL 2、硬件虚拟化等系统配置；具体系统要求以官方文档为准。已经安装的用户可以跳过安装。
+2. 打开 **Docker Desktop**，等待容器引擎启动完成，确保使用 **Linux 容器**。在 PowerShell 中执行 `docker version`，应能看到 Client 和 Server 信息；执行 `docker info --format '{{.OSType}}'`，结果应为 `linux`。
+3. 在 CodeTop 项目根目录打开 PowerShell，执行以下命令，下载项目指定的 Python 镜像。首次下载需要网络，等待出现 `Python ACM runner image is ready`：
+
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-runner.ps1
 ```
 
+4. 保持 Docker Desktop 运行，打开或刷新 CodeTop 的本地练习面板，确认显示“Docker 已就绪”后，再点击“运行”。以后使用代码运行功能时也要启动 Docker Desktop；镜像已准备好时无需每次重新下载。
+
+如果提示 Docker 未就绪，请检查 Docker Desktop 是否已启动、是否使用 Linux 容器；如果提示运行镜像未安装，重新执行上面的镜像准备命令。没有 Docker 时仍可读题、编辑代码、保存笔记和标记进度，但不能执行练习代码。
+
 代码运行在禁网、非 root 的隔离容器中。编辑器使用 Python ACM 风格：编写读取标准输入、输出结果的完整程序。本地样例通过不等于原题平台隐藏测试 AC。
+
+#### 配置 AI 助教（使用 AI 必需）
 
 AI 会将你选中的题面、代码、问题等上下文发送给 DeepSeek，调用费用由自己的账户承担。Key 使用 Windows 加密存储，不随学习备份导出。
 
@@ -90,7 +131,9 @@ AI 会将你选中的题面、代码、问题等上下文发送给 DeepSeek，�
 
 ## 开发与生成体验包
 
-技术栈：React + TypeScript + Vite、FastAPI + SQLAlchemy + SQLite，Python 代码通过 Docker 运行。
+技术栈：React + TypeScript + Vite、FastAPI + SQLAlchemy + SQLite，Python 代码支持本机执行和可选的 Docker 模式。
+
+完整桌面版用独立 CPython 子进程运行代码，以 Windows Job Object 管理资源及退出。维护者构建桌面安装包见[部署文档](docs/deployment.md#维护者构建完整桌面安装包)。
 
 在源码安装完成后，于项目根目录运行：
 

@@ -17,6 +17,7 @@ from . import catalog, imports, learning
 from .backups import create_backup
 from .runtime import RuntimeLock
 from .scheduler import TZ
+from .paths import default_data_dir
 
 
 def is_loopback_host(host: str) -> bool:
@@ -28,7 +29,7 @@ def is_loopback_host(host: str) -> bool:
 
 def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     root = Path(root or ROOT).resolve()
-    db = Database(data_dir or os.environ.get('CODETOP_DATA_DIR') or root / 'data')
+    db = Database(data_dir or os.environ.get('CODETOP_DATA_DIR') or (default_data_dir() if root == ROOT else root / 'data'))
     now = clock or (lambda: datetime.now(timezone.utc))
     token = secrets.token_urlsafe(32)
 
@@ -71,6 +72,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     app.include_router(runner_router)
     from .ai.routes import router as ai_router
     app.include_router(ai_router)
+    from .desktop_restore import router as desktop_router
+    app.include_router(desktop_router)
 
     from fastapi.exceptions import RequestValidationError
     from fastapi.exception_handlers import request_validation_exception_handler
@@ -91,7 +94,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             origin = request.headers.get('origin')
             if origin != f'http://{host}' or not secrets.compare_digest(request.headers.get('x-session-token',''), token):
                 return JSONResponse({'detail':'同源或本机会话校验失败，请刷新本地页面'}, status_code=403)
-            if int(request.headers.get('content-length') or 0) > 16*1024*1024:
+            upload_limit = 256*1024*1024 if request.url.path == '/api/v1/desktop/restore/preview' else 16*1024*1024
+            if int(request.headers.get('content-length') or 0) > upload_limit:
                 return JSONResponse({'detail':'上传上限为 16 MiB'}, status_code=413)
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'

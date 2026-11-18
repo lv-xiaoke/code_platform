@@ -10,6 +10,7 @@ import {RunResults,runLabel} from './RunResults'
 import {useTerminal} from './useTerminal'
 import {TerminalPanel} from './TerminalPanel'
 import './acm.css'
+import {ensureRunnerConsent,runnerLabel} from './runnerEnvironment'
 
 type Props={problemId:string;code:string;language:string;onCodeChange:(code:string)=>void;onLanguageChange:(language:string)=>void;onRewrite:(historyId?:number)=>Promise<boolean>;changingCode:boolean;registerGuard:(guard:(()=>Promise<boolean>)|null)=>void;beforeRun?:()=>Promise<boolean>;onAnalyze?:(runId:string)=>void}
 
@@ -41,6 +42,10 @@ function AcmContent({initial,...props}:Props&{initial:AcmSuite}){
     setSubmitting(true)
     try{
       if(props.beforeRun&&!await props.beforeRun())return
+      const currentHealth=await api<RunnerHealth>('/runner/health')
+      const accepted=await ensureRunnerConsent(currentHealth,()=>window.confirm('代码将在你的电脑上运行，可访问当前用户的文件和网络。请只运行你信任的代码。\n\n是否允许本机运行？'),()=>api('/runner/consent',{method:'POST',body:JSON.stringify({accepted:true})}))
+      if(!accepted)return
+      void health.refetch()
       if(mode==='quick'&&!inputOpen){setShowTerminal(true);setRunId(null);await terminal.start(source);return}
       if(mode!=='quick'&&!await suite.flush())return
       const {submission,signature}=mode==='quick'?prepareQuickRun(source,inputOpen?suite.snapshot().draft?.stdin??'':''):prepareRun(source,mode,suite.snapshot())
@@ -64,9 +69,9 @@ function AcmContent({initial,...props}:Props&{initial:AcmSuite}){
   const editingSavedCase=savedCases.some(c=>c.id===draft.id)
   const runDisabled=busy||props.changingCode||codeView==='history'||!health.data?.available
   const testDisabled=runDisabled||props.language!=='python'
-  return <section className="acm-workspace" aria-label="Python ACM 工作区"><header className="acm-title"><div><span className="eyebrow">WRITE · RUN · UNDERSTAND</span><h3><Terminal size={18}/>Python 代码</h3></div><span className={'runner-chip '+(health.data?.available?'ready':'')}>{health.isFetching?'检查运行环境…':health.data?.available?'Docker 已就绪':'Docker 未就绪'}</span></header>
+  return <section className="acm-workspace" aria-label="Python ACM 工作区"><header className="acm-title"><div><span className="eyebrow">WRITE · RUN · UNDERSTAND</span><h3><Terminal size={18}/>Python 代码</h3></div><span className={'runner-chip '+(health.data?.available?'ready':'')}>{health.isFetching?'检查运行环境…':health.data?runnerLabel(health.data):'运行环境未就绪'}</span></header>
     {(health.error||health.data?.error)&&<div className="local-error" role="alert">{health.error?.message??health.data?.error}<button onClick={()=>void health.refetch()}><RefreshCw size={13}/>重新检查</button></div>}
-    {health.data&&!health.data.available&&<p className="runner-setup-hint">本地运行需要 Docker Desktop 已启动并安装 Python 镜像。首次准备可运行 <code>.\scripts\setup-runner.ps1</code>，完成后点击“重新检查”。题目阅读、代码和测试编辑仍可使用。</p>}
+    {health.data&&!health.data.available&&<p className="runner-setup-hint">{health.data.kind==='native'?'内置 Python 未就绪，请重新安装完整桌面版；学习数据会保留。':'Docker 模式需要启动 Docker Desktop 并运行 scripts/setup-runner.ps1 准备 Python 镜像。'}完成后点击“重新检查”。题目阅读、代码和测试编辑仍可使用。</p>}
     <CodePractice problemId={props.problemId} code={props.code} language={props.language} view={codeView} onViewChange={setCodeView} onCodeChange={props.onCodeChange} onLanguageChange={props.onLanguageChange} onRewrite={async historyId=>{const ok=await props.onRewrite(historyId);if(ok){setShowTerminal(false);setRunId(null);pending.current=null}return ok}} changing={props.changingCode} disabled={busy}/>
     <p className="quick-code-hint muted">点击运行后，可在下方终端输入并按 Enter。也可以在代码中直接写函数调用、print 或 assert。</p>
     <div className="quick-run-actions"><button className="primary" disabled={runDisabled||props.language!=='python'} onClick={()=>void submit(props.code,'quick')}><Play size={15}/>{busy?'运行中…':'运行'}</button><button aria-expanded={inputOpen} aria-controls={'quick-input-'+props.problemId} onClick={()=>setInputOpen(!inputOpen)}>预设输入<ChevronDown size={13}/></button></div>

@@ -9,7 +9,8 @@ from uuid import UUID
 
 from .comparison import compare_output
 
-RUNNER_ROOT=Path(__file__).resolve().parents[2]/'runner'
+from ..paths import application_root
+RUNNER_ROOT=application_root()/'backend'/'runner'
 RUNTIME=json.loads((RUNNER_ROOT/'runtime.json').read_text(encoding='utf-8'))
 FLAGS={'creationflags':getattr(subprocess,'CREATE_NO_WINDOW',0)}
 
@@ -18,6 +19,7 @@ class RunnerUnavailable(RuntimeError): pass
 
 
 class DockerRunner:
+    kind = 'docker'
     def __init__(self,artifact_root):
         self.artifact_root=Path(artifact_root).resolve()
         self.artifact_root.mkdir(parents=True,exist_ok=True)

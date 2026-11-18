@@ -6,7 +6,8 @@ from sqlalchemy import select
 
 from .. import models as m
 
-PACK_ROOT=Path(__file__).resolve().parents[2]/'reference_pack'
+from ..paths import application_root
+PACK_ROOT=application_root()/'backend'/'reference_pack'
 GENERIC_TEMPLATE='''import sys
 
 
