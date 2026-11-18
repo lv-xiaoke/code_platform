@@ -9,7 +9,7 @@ CodeTop Local 当前验证目标是 Windows 10 / 11 x64 的个人本机使用。
 | Windows 体验包 | uv、网络；脚本准备 Python 3.12 与后端依赖 | 双击 Start-CodeTop.cmd |
 | 源码 | uv、Node.js/npm、网络；Git 或源码 ZIP | 同上 |
 
-安装 uv 可参考 [官方安装文档](https://docs.astral.sh/uv/getting-started/installation/)，WinGet 命令为 `winget install --id=astral-sh.uv -e`。安装完成后重新打开终端，运行 `uv --version` 确认 PATH 生效。Python 3.12 由 uv 按需获取。
+先运行 `uv --version`：能显示版本号说明已安装，无需重复安装。提示找不到命令时，可参考 [官方安装文档](https://docs.astral.sh/uv/getting-started/installation/)，WinGet 命令为 `winget install --id=astral-sh.uv -e`。安装完成后重新打开终端，运行 `uv --version` 确认 PATH 生效。Python 3.12 由 uv 按需获取。
 
 下载源码不需要配置 GitHub OAuth 或 `.env`；`frontend/.env.example` 是保留的上游配置示例，本地题单不依赖它。
 

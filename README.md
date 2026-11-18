@@ -37,7 +37,7 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
 ### 方式一：Windows 体验包（推荐）
 
 1. 从仓库的 [Releases 页面](https://github.com/lv-xiaoke/code_platform/releases)下载 `CodeTop-Local-Windows-*.zip`，完整解压到你准备长期保存的目录，例如 `D:\Apps\CodeTop-Local`。请选择这个体验包；GitHub 自动生成的 `Source code.zip` 是下面的源码方式。若尚无发行附件，可先按方式二安装。
-2. 安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)。可在 PowerShell 中运行官方提供的 WinGet 安装命令：
+2. 打开 PowerShell，先运行 `uv --version`。如果能看到版本号，说明已安装，直接进入第 3 步；只有提示找不到命令时，才需要安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)。可运行官方提供的 WinGet 安装命令：
 
    ```powershell
    winget install --id=astral-sh.uv -e
