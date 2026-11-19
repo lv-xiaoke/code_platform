@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 import time
 from uuid import uuid4
@@ -36,7 +37,10 @@ def test_settings_encrypt_key_and_missing_key_keeps_chat_empty(loaded):
     result = configure(c)
     assert 'sk-test-secret' not in result.text and result.json()['configured']
     secret = app.state.db.data_dir/'ai-key.dpapi'
-    assert b'sk-test-secret' not in secret.read_bytes()
+    if os.name == 'nt':
+        assert b'sk-test-secret' not in secret.read_bytes()
+    else:
+        assert not secret.exists()
     with app.state.db.engine.connect() as conn:
         assert 'sk-test-secret' not in str(conn.execute(select(m.settings)).all())
     from app.backups import create_backup

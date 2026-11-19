@@ -3,6 +3,8 @@ import ctypes
 from ctypes import wintypes
 import os
 from pathlib import Path
+import hashlib
+from .. import platforms
 
 
 class Blob(ctypes.Structure):
@@ -28,13 +30,23 @@ def crypt(data, decrypt=False):
 
 
 class KeyStore:
-    def __init__(self, data_dir): self.path = Path(data_dir)/'ai-key.dpapi'
+    def __init__(self, data_dir):
+        self.path = Path(data_dir)/'ai-key.dpapi'
+        self.account = hashlib.sha256(str(Path(data_dir).resolve()).encode('utf-8')).hexdigest()
 
     def read(self):
+        if platforms.system_name() == 'macos':
+            from . import macos_keychain
+            value = macos_keychain.read('CodeTopLocal.DeepSeek', self.account)
+            return value if value is not None else os.environ.get('DEEPSEEK_API_KEY', '').strip()
         if self.path.exists(): return crypt(self.path.read_bytes(),True).decode('utf-8')
         return os.environ.get('DEEPSEEK_API_KEY','').strip()
 
     def write(self, key):
+        if platforms.system_name() == 'macos':
+            from . import macos_keychain
+            macos_keychain.write('CodeTopLocal.DeepSeek', self.account, key)
+            return
         # Atomic replacement never publishes a partial encrypted credential.
         pending = self.path.with_suffix('.pending')
         pending.write_bytes(crypt(key.encode('utf-8')))
