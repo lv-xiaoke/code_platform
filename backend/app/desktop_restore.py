@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 
 from .backups import restore_backup
+from . import platforms
 
 router = APIRouter(prefix='/api/v1/desktop')
 _confirm_lock = threading.Lock()
@@ -38,7 +39,7 @@ def start_restore_helper(stage, argv, timeout=5):
     write_status(stage, value)
     process = None
     try:
-        process = subprocess.Popen([*argv, '--attempt', attempt], creationflags=0x08000000)
+        process = subprocess.Popen([*argv, '--attempt', attempt], **platforms.background_options())
         deadline = time.monotonic() + timeout
         while not (stage / ('helper-ready-' + attempt)).exists():
             if process.poll() is not None or time.monotonic() > deadline:
@@ -108,8 +109,12 @@ def confirm(ticket: str, request: Request):
         if value['state'] != 'preview':
             raise HTTPException(409, '恢复请求已处理')
         port = request.app.state.desktop_port
-        value = start_restore_helper(stage, [sys.executable, '--restore', ticket, '--parent-pid', str(os.getpid()),
-                                           '--data-dir', str(request.app.state.db.data_dir), '--port', str(port)])
+        argv = [sys.executable, '--restore', ticket, '--parent-pid', str(os.getpid()),
+                '--data-dir', str(request.app.state.db.data_dir), '--port', str(port)]
+        identity = platforms.process_identity(os.getpid())
+        if identity is not None:
+            argv.extend(['--parent-identity', identity])
+        value = start_restore_helper(stage, argv)
         value['state'] = 'restoring'
         write_status(stage, value)
         request.app.state.restore_pending = True
