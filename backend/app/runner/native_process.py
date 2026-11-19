@@ -4,6 +4,7 @@ import os
 import queue
 import threading
 import time
+import select
 
 from .. import platforms
 
@@ -30,6 +31,10 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
             if key in os.environ:
                 env[key] = os.environ[key]
     process = process_backend()([python, '-I', '-S', '-B', '-u', '-X', 'utf8', script], script.parent, env)
+    posix_pipes = os.name != 'nt'
+    if posix_pipes:
+        for stream in (process.stdin, process.stdout, process.stderr):
+            os.set_blocking(stream.fileno(), False)
     events = queue.Queue(maxsize=32)
     done = threading.Event()
     buffers = {'stdout': bytearray(), 'stderr': bytearray()}
@@ -46,12 +51,39 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
 
     def read(name):
         try:
-            while data := getattr(process, name).read(8192):
+            stream = getattr(process, name)
+            while not done.is_set():
+                if posix_pipes:
+                    if not select.select([stream.fileno()], [], [], .05)[0]:
+                        continue
+                    try:
+                        data = os.read(stream.fileno(), 8192)
+                    except BlockingIOError:
+                        continue
+                else:
+                    data = stream.read(8192)
+                if not data:
+                    break
                 post((name, data))
         except (OSError, ValueError):
             pass
         finally:
             post((name, None))
+
+    def write_bytes(data):
+        while data and not done.is_set() and not stop_event.is_set():
+            if posix_pipes:
+                if not select.select([], [process.stdin.fileno()], [], .05)[1]:
+                    continue
+                try:
+                    written = os.write(process.stdin.fileno(), data[:8192])
+                except BlockingIOError:
+                    continue
+            else:
+                written = process.stdin.write(data)
+            if not written:
+                raise OSError('stdin pipe closed')
+            data = data[written:]
 
     def write():
         try:
@@ -59,9 +91,7 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
                 data = (stdin or '').encode('utf-8')
                 if len(data) > LIMIT:
                     raise ValueError('输入超过 64 KiB')
-                while data:
-                    written = process.stdin.write(data)
-                    data = data[written:]
+                write_bytes(data)
             else:
                 count = 0
                 while not done.is_set() and not stop_event.is_set():
@@ -73,10 +103,7 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
                     count += len(data)
                     if count > LIMIT:
                         raise ValueError('输入超过 64 KiB')
-                    # Raw FileIO writes can be partial on Windows pipes.
-                    while data:
-                        written = process.stdin.write(data)
-                        data = data[written:]
+                    write_bytes(data)
                     if message.get('eof'):
                         break
         except (OSError, ValueError):
@@ -134,6 +161,8 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
         if status == 'executed':
             if process.memory_exceeded or (exit_code and 'MemoryError' in output['stderr']):
                 status = 'memory_limit'
+            elif platforms.system_name() == 'macos' and exit_code == -24:  # Darwin SIGXCPU
+                status = 'time_limit'
             elif exit_code:
                 status = 'syntax_error' if 'SyntaxError' in output['stderr'] or 'IndentationError' in output['stderr'] else 'runtime_error'
         return {**output, 'status': status, 'exit_code': exit_code,

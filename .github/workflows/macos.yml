@@ -1,0 +1,110 @@
+name: macOS support and backup exchange
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            arch: windows-x64
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.5'
+      - name: Prepare native build Python
+        if: runner.os == 'macOS'
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          test "$(uname -m)" = "$TARGET_ARCH"
+          python_root="$(python scripts/fetch_macos_python.py --arch "$TARGET_ARCH")"
+          "$python_root/bin/python3" -m venv backend/.venv
+          echo "CODETOP_PYTHON_ROOT=$python_root" >> "$GITHUB_ENV"
+          echo "CODETOP_PYTHON=$GITHUB_WORKSPACE/backend/.venv/bin/python" >> "$GITHUB_ENV"
+      - name: Prepare Windows test Python
+        if: runner.os == 'Windows'
+        run: echo "CODETOP_PYTHON=$(command -v python)" >> "$GITHUB_ENV"
+      - name: Install locked dependencies
+        run: |
+          "$CODETOP_PYTHON" -m pip install -r backend/requirements.lock.txt
+          "$CODETOP_PYTHON" -m pip install -r packaging/build-requirements.lock.txt
+          cd frontend
+          bun install --frozen-lockfile
+      - name: Backend verification
+        run: '"$CODETOP_PYTHON" -m pytest -c backend/pytest.ini backend/tests -q --tb=short'
+      - name: Frontend tests and release build
+        run: |
+          node --test frontend/tests/*.test.mjs
+          "$CODETOP_PYTHON" scripts/build_frontend.py --node "$(command -v node)"
+      - name: Export synthetic learning backup
+        run: '"$CODETOP_PYTHON" scripts/backup_exchange.py export --output "runtime/backup-${{ matrix.arch }}"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ matrix.arch }}
+          path: runtime/backup-${{ matrix.arch }}/
+      - name: Build macOS test package
+        if: runner.os == 'macOS'
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: '"$CODETOP_PYTHON" scripts/build_macos.py --python-root "$CODETOP_PYTHON_ROOT" --arch "$TARGET_ARCH"'
+      - name: Smoke-test packaged app in a relocated path
+        if: runner.os == 'macOS'
+        run: |
+          "$CODETOP_PYTHON" - <<'PY'
+          import json, pathlib, subprocess, sys
+          report = max(pathlib.Path('dist').glob('macos-*/build-report.json'), key=lambda p: p.stat().st_mtime)
+          app = pathlib.Path(json.loads(report.read_text())['app'])
+          moved = pathlib.Path('runtime') / ('移动 with spaces-' + report.parent.name) / 'CodeTop.app'
+          moved.parent.mkdir(parents=True)
+          subprocess.run(['/usr/bin/ditto', str(app), str(moved)], check=True)
+          subprocess.run([sys.executable, 'scripts/verify_macos.py', '--app', str(moved),
+                          '--report', str(report.parent / 'smoke-report.json')], check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always() && runner.os == 'macOS'
+        with:
+          name: macos-${{ matrix.arch }}-test-package
+          path: dist/macos-*/
+          if-no-files-found: warn
+
+  import-backups:
+    needs: test-and-build
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-latest, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.13'
+      - run: python -m pip install -r backend/requirements.lock.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: backup-*
+          path: runtime/backup-fixtures
+      - run: python scripts/backup_exchange.py import --fixtures-dir runtime/backup-fixtures

@@ -22,6 +22,18 @@ def background_options():
     return {'creationflags': 0x08000000} if system_name() == 'windows' else {'start_new_session': True}
 
 
+def open_browser(url):
+    try:
+        if system_name() == 'macos':
+            subprocess.run(['/usr/bin/open', url], check=True, timeout=15, capture_output=True)
+        else:
+            import webbrowser
+            if not webbrowser.open(url):
+                raise RuntimeError('Browser unavailable')
+    except (OSError, subprocess.SubprocessError, RuntimeError):
+        raise RuntimeError(f'无法打开浏览器，请手动打开 {url}') from None
+
+
 def process_identity(pid):
     if system_name() != 'macos':
         return None

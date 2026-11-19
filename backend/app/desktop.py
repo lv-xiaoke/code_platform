@@ -9,7 +9,6 @@ import subprocess
 import sys
 import time
 import urllib.request
-import webbrowser
 from contextlib import contextmanager
 
 from .paths import application_root, default_data_dir
@@ -80,7 +79,7 @@ def launch(data, preferred=8000, browser=True):
             try:
                 if matches(health(port), data):
                     if browser:
-                        webbrowser.open(f'http://127.0.0.1:{port}/')
+                        platforms.open_browser(f'http://127.0.0.1:{port}/')
                     return port
             except (OSError, ValueError):
                 pass
@@ -103,7 +102,7 @@ def launch(data, preferred=8000, browser=True):
                         pending.write_text(json.dumps({'port': port, 'pid': process.pid}), encoding='utf-8')
                         pending.replace(marker)
                         if browser:
-                            webbrowser.open(f'http://127.0.0.1:{port}/')
+                            platforms.open_browser(f'http://127.0.0.1:{port}/')
                         return port
                 except (OSError, ValueError):
                     pass

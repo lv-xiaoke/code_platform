@@ -17,7 +17,8 @@ class NativeRunner:
         self.artifact_root = Path(artifact_root).resolve()
         self.artifact_root.mkdir(parents=True, exist_ok=True)
         self.python = native_python()
-        self.image_ref = 'local-python@3.12-windows-x64'
+        suffix = 'macos-' + platforms.architecture() if platforms.system_name() == 'macos' else 'windows-x64'
+        self.image_ref = 'local-python@3.12-' + suffix
         self.python_version = '3.12'
         self.lock = threading.Lock()
         self.active = set()
@@ -31,7 +32,7 @@ class NativeRunner:
             if not self.verified:
                 verify_bundled_runtime()
                 self.verified = True
-            result = subprocess.run([str(self.python), '-I', '-S', '-X', 'utf8', '-c',
+            result = subprocess.run([str(self.python), '-I', '-S', '-B', '-X', 'utf8', '-c',
                                      'import json,sys; print(json.dumps(sys.version_info[:3]))'],
                                     capture_output=True, timeout=5, **platforms.background_options())
             version = json.loads(result.stdout)

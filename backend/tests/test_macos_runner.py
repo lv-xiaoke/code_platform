@@ -74,3 +74,25 @@ def test_parent_exit_cleans_child_holding_pipe(tmp_path):
         assert process.status() == psutil.STATUS_ZOMBIE
     except psutil.NoSuchProcess:
         pass
+
+
+def test_detached_child_cannot_keep_transport_threads_alive(tmp_path):
+    import psutil
+    from app.runner.native_process import execute_process
+    from app.paths import native_python
+    before = {t.ident for t in threading.enumerate()}
+    script = tmp_path / 'detached.py'
+    script.write_text('import subprocess,sys\np=subprocess.Popen([sys.executable,"-c","import time; time.sleep(30)"],start_new_session=True)\nprint(p.pid,flush=True)')
+    result = execute_process(native_python(), script)
+    try:
+        assert not [t for t in threading.enumerate() if t.ident not in before]
+    finally:
+        # One explicitly named test child outside the runner's documented group scope.
+        pid = int(result['stdout'].strip())
+        try:
+            child = psutil.Process(pid)
+            if 'time.sleep(30)' in ' '.join(child.cmdline()):
+                child.kill()
+                child.wait(timeout=5)
+        except psutil.NoSuchProcess:
+            pass

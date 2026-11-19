@@ -40,3 +40,23 @@ def test_restore_helper_uses_platform_options(tmp_path, monkeypatch):
     monkeypatch.setattr(desktop_restore.subprocess, 'Popen', popen)
     desktop_restore.start_restore_helper(tmp_path, ['helper'])
     assert captured == {'start_new_session': True}
+
+
+def test_macos_browser_open_is_independent_of_path(monkeypatch):
+    from app import platforms
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'macos')
+    monkeypatch.setenv('PATH', '')
+    captured = []
+    monkeypatch.setattr(platforms.subprocess, 'run', lambda argv, **kw: captured.append((argv, kw)))
+    platforms.open_browser('http://127.0.0.1:8000/')
+    assert captured[0][0] == ['/usr/bin/open', 'http://127.0.0.1:8000/']
+    assert captured[0][1]['check'] is True
+
+
+def test_failed_browser_launch_has_manual_url(monkeypatch):
+    from app import platforms
+    import webbrowser
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'windows')
+    monkeypatch.setattr(webbrowser, 'open', lambda url: False)
+    with pytest.raises(RuntimeError, match='http://127.0.0.1:8000/'):
+        platforms.open_browser('http://127.0.0.1:8000/')

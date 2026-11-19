@@ -1,5 +1,7 @@
 # CodeTop Local
 
+macOS：适配代码与构建入口见[部署说明](deployment.md#macos-构建与使用)，当前正式下载仍以已发布的 Windows 安装包为准。Mac 版本尚待真实平台验收，状态见[验收记录](macos-validation.md)。源码模式可通过 `bash scripts/start-macos.sh` 启动，`--no-browser` 常驻；未来完整应用通过 Finder 双击启动，学习数据位于用户 Application Support 目录。
+
 简洁的本机高频刷题题单：筛选题目、本地读题与 Python ACM 练习、标记进度、记录笔记。当前应用版本 **1.6.0**，数据库结构为 **0003**。完整桌面版内置本机 Python，无需 Docker；本文中容器准备与隔离说明仅适用于显式 Docker 模式。
 
 文中命令默认在你自己的项目根目录运行。首次安装和故障处理见[部署说明](deployment.md)。
