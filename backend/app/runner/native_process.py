@@ -5,9 +5,19 @@ import queue
 import threading
 import time
 
-from .windows_job import JobProcess
+from .. import platforms
 
 LIMIT = 65536
+
+
+def process_backend():
+    if platforms.system_name() == 'macos':
+        from .macos_process import MacProcess
+        return MacProcess
+    if platforms.system_name() == 'windows':
+        from .windows_job import JobProcess
+        return JobProcess
+    raise ValueError('此系统暂不支持本机 Python 执行')
 
 
 def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
@@ -15,7 +25,11 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
     stop_event = stop_event or threading.Event()
     env = {k: v for k, v in os.environ.items() if k.upper() in ('SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'COMSPEC', 'SYSTEMDRIVE')}
     env['PATH'] = str(python.parent)
-    process = JobProcess([python, '-I', '-S', '-B', '-u', '-X', 'utf8', script], script.parent, env)
+    if platforms.system_name() == 'macos':
+        for key in ('TMPDIR', 'LANG', 'LC_CTYPE'):
+            if key in os.environ:
+                env[key] = os.environ[key]
+    process = process_backend()([python, '-I', '-S', '-B', '-u', '-X', 'utf8', script], script.parent, env)
     events = queue.Queue(maxsize=32)
     done = threading.Event()
     buffers = {'stdout': bytearray(), 'stderr': bytearray()}
@@ -77,7 +91,7 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
     threads.append(threading.Thread(target=write, daemon=True))
     for thread in threads:
         thread.start()
-    ended, exit_code, parent_done = set(), None, False
+    ended, exit_code, parent_done, drain_deadline = set(), None, False, None
     try:
         while len(ended) < 2 or exit_code is None:
             memory = process.limit_events()
@@ -94,6 +108,9 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
             if exit_code is not None and not parent_done:
                 parent_done = True
                 process.terminate()  # reap children that inherited output pipe handles
+                drain_deadline = time.monotonic() + 2
+            if drain_deadline is not None and time.monotonic() > drain_deadline:
+                break  # Detached children cannot hold this request's pipes indefinitely.
             try:
                 name, data = events.get(timeout=.02)
             except queue.Empty:
