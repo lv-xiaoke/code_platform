@@ -151,3 +151,11 @@ def test_frozen_entry_disables_resource_bytecode_before_import(monkeypatch):
     monkeypatch.setattr(sys, 'dont_write_bytecode', False)
     runpy.run_path(str(Path(__file__).resolve().parents[2] / 'packaging/desktop_entry.py'))
     assert observed == [True]
+
+
+def test_dylib_install_id_is_not_an_external_dependency():
+    from scripts.build_macos import library_dependencies
+    commands = 'Load command 3\n cmd LC_ID_DYLIB\n cmdsize 56\n name @rpath/libpython3.12.dylib (offset 24)\n'
+    links = ['    @rpath/libpython3.12.dylib (compatibility version 3.12.0)',
+             '    /usr/lib/libSystem.B.dylib (compatibility version 1.0.0)']
+    assert library_dependencies(commands, links) == ['/usr/lib/libSystem.B.dylib']

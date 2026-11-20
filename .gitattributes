@@ -1,0 +1,2 @@
+# The catalog is a hash-pinned source snapshot. Never rewrite its bytes on checkout.
+vendor/algoTop-main/public/data/codetop.json -text

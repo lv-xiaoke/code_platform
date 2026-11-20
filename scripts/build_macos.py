@@ -121,6 +121,14 @@ def resolve_library(library, binary, app, executable, rpaths):
     raise ValueError(f'Missing or external dependency: {binary}: {library}')
 
 
+def library_dependencies(load_commands, link_lines):
+    # otool -L prints LC_ID_DYLIB before the actual dependencies of a dylib.
+    identity = re.search(r'cmd LC_ID_DYLIB\s+cmdsize \d+\s+name (.*?) \(offset', load_commands)
+    own_id = identity.group(1) if identity else None
+    links = [line.strip().split(' (', 1)[0] for line in link_lines]
+    return [link for link in links if link != own_id]
+
+
 def audit_binaries(app, arch, deployment_target):
     evidence = []
     binaries = list(macho_files(app))
@@ -146,8 +154,7 @@ def audit_binaries(app, arch, deployment_target):
                 if not resolved.is_relative_to(app.resolve()) and not is_system_path(resolved):
                     raise ValueError(f'External dependency search path: {owner}: {value}')
                 rpaths.append(resolved)
-        for line in links:
-            library = line.strip().split(' (', 1)[0]
+        for library in library_dependencies(load, links):
             resolve_library(library, path, app, executable, rpaths)
         evidence.append({'path': path.relative_to(app).as_posix(), 'architectures': arches, 'minos': minimums})
     return evidence
