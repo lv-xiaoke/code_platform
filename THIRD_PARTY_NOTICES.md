@@ -29,3 +29,12 @@ bc496564c4939eae1173636dec05b358b0a46b0b6dd1797d3ff10416dbc81ac9
 - 前端使用 React、TanStack Query、Vite、TypeScript、CodeMirror、lucide-react、highlight.js 和 [DOMPurify](https://github.com/cure53/DOMPurify)；后端使用 FastAPI、Starlette、Pydantic、SQLAlchemy、Alembic、Uvicorn 和 Python SQLite。依赖以各自项目的许可证为准；后端锁文件和源码仓库中的前端、构建工具锁文件记录其版本，安装后的依赖保留其许可证文件。
 
 对外分享请使用发布脚本生成的 ZIP，不要直接压缩自己的工作目录。
+
+## 按需语言工具链
+
+多语言源码分支可按需下载以下官方工具链；这些工具链不内置于基础应用或学习备份。具体版本、SHA-256 和下载入口由 `packaging/toolchains.json` 固定，发行包内的 LICENSE / legal 文件随环境保留。
+
+- [LLVM-MinGW](https://github.com/mstorsjo/llvm-mingw)：LLVM Apache-2.0 WITH LLVM-exception、mingw-w64 及其组件许可证。
+- [Eclipse Temurin](https://adoptium.net/temurin/releases?version=21)：GPL-2.0 with Classpath Exception 及包内组件许可证。
+- [Node.js](https://nodejs.org/)：MIT 及其内置第三方组件许可证。
+- Mac C/C++ 使用用户安装的 Apple 开发工具和 SDK，按 Apple 的分发与使用条款提供；本项目不重新分发 Apple SDK。

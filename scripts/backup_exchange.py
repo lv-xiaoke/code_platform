@@ -54,6 +54,22 @@ def export_fixture(output):
         ]
         for response in actions:
             response.raise_for_status()
+        # Include every executable language, a saved empty legacy draft and preference.
+        for language, code in [('c', '#include <stdio.h>\nint main(void){puts("你好");}'),
+                ('cpp', '#include <iostream>\nint main(){std::cout<<"你好";}'),
+                ('java', 'public class Main {}'), ('javascript', 'console.log("你好")'), ('sql', '')]:
+            client.put(f'/api/v1/problems/{pid}/code/drafts/{language}', json={'revision': 0, 'code_text': code}).raise_for_status()
+        pref = client.get(f'/api/v1/problems/{pid}/code/preference').json()
+        client.put(f'/api/v1/problems/{pid}/code/preference', json={'revision': pref['revision'], 'language': 'java'}).raise_for_status()
+        from app import models as m
+        for language in ('python','c','cpp','java','javascript'):
+            run_id = str(uuid4())
+            with app.state.db.write() as conn:
+                conn.execute(m.runs.insert().values(id=run_id, problem_id=pid, request_id=run_id, request_hash=run_id,
+                    source_code='synthetic backup fixture', tests_json='[]', results_json='{"results":[]}',
+                    language=language, runtime_version='fixture-version',toolchain_id='fixture-toolchain',
+                    compile_json='{"stderr":"合成编译诊断"}',limits_json='{"memory_mb":256}',
+                    status='completed',created_at='2026-11-20T00:00:00+00:00'))
         backup = create_backup(app.state.db)
         shutil.copy2(data / 'backups' / backup['filename'], output / 'backup.zip')
         (output / 'summary.json').write_text(json.dumps(database_summary(app.state.db.path), indent=2), encoding='utf-8')

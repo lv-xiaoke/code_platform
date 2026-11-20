@@ -1,9 +1,8 @@
 import os
-import sys
 
 
 def runner_kind():
-    kind = os.environ.get('CODETOP_RUNNER', 'native' if getattr(sys, 'frozen', False) else 'docker')
+    kind = os.environ.get('CODETOP_RUNNER', 'native')
     if kind not in ('native', 'docker'):
         raise ValueError('CODETOP_RUNNER 只能为 native 或 docker')
     return kind

@@ -15,7 +15,7 @@ REQUIRED = (
     'backend/migrations/env.py', 'backend/runner/runtime.json',
     'backend/reference_pack/manifest.json', 'frontend/LICENSE',
     'vendor/algoTop-main/LICENSE', 'vendor/algoTop-main/public/data/codetop.json',
-    'docs/deployment.md', 'docs/user-guide.md', 'releases/current.json',
+    'docs/deployment.md', 'docs/user-guide.md', 'releases/current.json', 'packaging/toolchains.json',
 )
 PATTERNS = (
     'backend/app/**/*.py', 'backend/migrations/**/*.py', 'backend/migrations/**/*.sql',

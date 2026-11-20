@@ -1,4 +1,5 @@
 import threading
+import os
 import time
 from uuid import uuid4
 
@@ -12,7 +13,10 @@ def test_terminal_supports_language_input_and_eof(tmp_path, language_registry, l
     from app.runner.terminal import TerminalSession
     from app.runner.terminal_native import NativeTerminalRunner
     from app.runner.schemas import TerminalInput
-    assert language_registry.capability(language)['available']
+    capability = language_registry.capability(language)
+    if not capability['available']:
+        if os.environ.get('CODETOP_REQUIRE_LANGUAGES') == '1': pytest.fail(str(capability))
+        pytest.skip(str(capability))
     session = TerminalSession(str(uuid4()), 'p', SOURCES[language], language=language)
     runner = NativeTerminalRunner(tmp_path, registry=language_registry)
     result = []
@@ -44,6 +48,10 @@ def test_terminal_start_identity_has_language_and_compile_failure_is_terminal(lo
     c, app, _, pid = loaded
     from pathlib import Path
     registry = ToolchainRegistry(Path(__file__).resolve().parents[2] / 'runtime/toolchains-ci')
+    if not registry.capability('java')['available']:
+        registry.close()
+        if os.environ.get('CODETOP_REQUIRE_LANGUAGES') == '1': pytest.fail('Java toolchain missing')
+        pytest.skip('Java toolchain missing')
     app.state.terminal_service.runner = NativeTerminalRunner(tmp_path, registry=registry)
     try:
         accept_native_execution(app.state.db.data_dir)
@@ -79,6 +87,10 @@ def test_stop_during_compilation_never_reaches_ready(loaded, tmp_path, monkeypat
         raise programs.PreparationError('stopped', {'stderr': 'compile stopped'}, {'language': language})
     monkeypatch.setattr(programs.ProgramPreparer, 'prepare', blocked_prepare)
     registry = ToolchainRegistry(Path(__file__).resolve().parents[2] / 'runtime/toolchains-ci')
+    if not registry.capability('java')['available']:
+        registry.close()
+        if os.environ.get('CODETOP_REQUIRE_LANGUAGES') == '1': pytest.fail('Java toolchain missing')
+        pytest.skip('Java toolchain missing')
     app.state.terminal_service.runner = NativeTerminalRunner(tmp_path, registry=registry)
     try:
         accept_native_execution(app.state.db.data_dir)

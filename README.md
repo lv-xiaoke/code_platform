@@ -1,6 +1,6 @@
 # CodeTop Local
 
-**把高频选题、本地读题、Python 练习、笔记和 AI 助教放在一起的个人刷题工具。**
+**把高频选题、本地读题、代码练习、笔记和 AI 助教放在一起的个人刷题工具。**
 
 准备算法面试时，按目标公司、部门、岗位和考察频次筛题，在浏览器里直接读题、写代码、记笔记，学习记录保存在自己的电脑上。
 
@@ -76,7 +76,28 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
 
 ## 开发与生成体验包
 
-技术栈：React + TypeScript + Vite、FastAPI + SQLAlchemy + SQLite，Python 代码支持本机执行和可选的 Docker 模式。
+### 多语言练习（当前源码，待发布）
+
+当前源码支持下列五种语言的单文件完整程序，提供标准输入/输出、交互终端、编译诊断和批量样例。**上方已发布的 v1.6.0 Windows / macOS 下载包仍为 Python 版本，多语言功能尚未发布到 Release。**
+
+| 语言 | Windows x64 | Mac M 系列 / Intel |
+| --- | --- | --- |
+| Python 3.12 | 内置 Python | 内置 Python |
+| C17 / C++17 | 按需准备完整 LLVM-MinGW | 使用 Apple Command Line Tools 与 macOS SDK |
+| Java 21 | 按需准备 Eclipse Temurin JDK | 按需准备对应架构 Eclipse Temurin JDK |
+| JavaScript · Node.js 24 | 按需准备 Node.js | 按需准备对应架构 Node.js |
+
+在“代码语言”中选择语言，然后在“语言环境”中点击“准备环境”。选择本身不会下载；首次准备需联网，完成后可离线执行。Mac 缺少 C/C++ 环境时，按面板中的 Apple 官方说明安装 Command Line Tools，再重新检查，无需完整 Xcode 或付费开发者账号。
+
+每题各语言的草稿独立保存，Markdown 笔记和输入输出样例共享。切换前会停止当前任务并保存代码；冲突时保留输入。重新编写只归档当前语言，载入历史只替换该历史对应语言的草稿。Go、Rust、TypeScript、SQL 等旧语言仍可编辑和保存，暂不支持执行。
+
+Java 使用无 `package` 声明的 `Main` 类；C/C++ 使用标准头文件，跨平台不保证 `bits/stdc++.h` 等 GNU 扩展；JavaScript 使用 CommonJS，可通过 `fs` 读取标准输入。读取到 EOF 的程序需点击“结束输入”；C/C++ 交互提示需 `fflush(stdout)` / `std::flush`。首版不提供多文件工程、依赖安装、REPL 或调试器。
+
+编译预算为墙钟 30 秒、CPU 20 秒、总内存目标 1 GiB、诊断 256 KiB。普通运行墙钟 2 秒、交互墙钟 300 秒、CPU 3 秒、输入和输出各 64 KiB；Python/C/C++ 总内存目标 256 MiB，Java/JavaScript 为 512 MiB，堆上限各 128 MiB。Mac 的进程组 RSS 采样可能短暂超出阈值。本机执行拥有当前用户的文件与网络权限。
+
+当前源码和完整应用默认本机执行，`CODETOP_RUNNER=docker` 可显式选择仅支持 Python 的 Docker 模式。工具链不改写全局 PATH 或 JAVA_HOME；目录、备份升级和测试记录见[多语言验收](docs/multilanguage-acceptance.md)。
+
+技术栈：React + TypeScript + Vite、FastAPI + SQLAlchemy + SQLite，本机执行支持五种语言，Python 另有可选的 Docker 模式。
 
 完整应用用独立 CPython 子进程运行代码：Windows 使用 Job Object，Mac 使用进程组与 RSS 采样管理资源。本机模式以当前用户权限执行，仅运行自己信任的练习代码。维护者构建见 [Windows 安装包](docs/deployment.md#维护者构建完整桌面安装包)和 [Mac DMG](docs/deployment.md#构建-codetopapp-和测试-dmg)。
 

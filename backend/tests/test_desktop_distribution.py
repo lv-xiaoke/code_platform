@@ -22,7 +22,7 @@ def test_desktop_assets_exclude_personal_files_and_old_builds(tmp_path, monkeypa
         'frontend/LICENSE': 'MIT', 'vendor/algoTop-main/LICENSE': 'MIT',
         'vendor/algoTop-main/public/data/codetop.json': '{}',
         'backend/migrations/env.py': '# migration',
-        'backend/runner/runtime.json': '{}',
+        'backend/runner/runtime.json': '{}', 'packaging/toolchains.json': '{}',
         'releases/current.json': json.dumps({'path': 'releases/current-build'}),
         'releases/current-build/index.html': '<html>ok</html>',
         'releases/current-build/assets/app.js': 'ok',

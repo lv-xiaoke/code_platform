@@ -54,7 +54,7 @@ def source(tmp_path):
         'scripts/setup-runner.ps1': '# runner',
         'backend/app/__init__.py': "__version__ = '1.5.0'",
         'backend/migrations/env.py': '# migration',
-        'backend/runner/runtime.json': '{}', 'backend/runner/worker.py': '# worker',
+        'backend/runner/runtime.json': '{}', 'backend/runner/worker.py': '# worker', 'packaging/toolchains.json': '{}',
         'backend/requirements.lock.txt': 'fastapi==0.156.4',
         'backend/reference_pack/manifest.json': '{}',
         'vendor/algoTop-main/LICENSE': 'MIT',

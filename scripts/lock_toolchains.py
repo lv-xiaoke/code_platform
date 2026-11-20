@@ -1,6 +1,7 @@
 """Build-time only: resolve official assets to an immutable, reviewable manifest."""
 import argparse
 import json
+import os
 from pathlib import Path
 import urllib.request
 from urllib.parse import quote
@@ -8,6 +9,8 @@ from urllib.parse import quote
 
 def read(url):
     request = urllib.request.Request(url, headers={'User-Agent': 'CodeTop-toolchain-lock'})
+    if url.startswith('https://api.github.com/') and os.environ.get('GITHUB_TOKEN'):
+        request.add_header('Authorization', 'Bearer ' + os.environ['GITHUB_TOKEN'])
     with urllib.request.urlopen(request, timeout=60) as response:
         return response.read()
 

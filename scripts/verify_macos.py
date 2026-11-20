@@ -15,7 +15,7 @@ import urllib.request
 from uuid import uuid4
 
 
-def verify_app(app, report_path):
+def verify_app(app, report_path, toolchains_root=None):
     app = app.resolve()
     report_path = report_path.resolve()
     executable = app / 'Contents/MacOS/CodeTop'
@@ -60,6 +60,7 @@ def verify_app(app, report_path):
         with executable.open('rb') as stream:
             report['executable_sha256'] = hashlib.file_digest(stream, 'sha256').hexdigest()
         env = {'PATH': '/usr/bin:/bin', 'HOME': str(Path.home()), 'TMPDIR': str(data), 'CODETOP_DATA_DIR': str(data)}
+        if toolchains_root: env['CODETOP_TOOLCHAINS_DIR'] = str(toolchains_root.resolve())
         with (data / 'service.log').open('ab') as log:
             process = subprocess.Popen([str(executable), '--serve', '--data-dir', str(data), '--port', str(port)],
                                        env=env, cwd=data, stdout=log, stderr=log, start_new_session=True)
@@ -79,12 +80,16 @@ def verify_app(app, report_path):
         deadline = time.monotonic() + 15
         while time.monotonic() < deadline:
             result = request('/api/v1/runs/' + job['id'])
-            if result['status'] not in ('queued', 'running'):
+            if result['status'] not in ('queued', 'preparing', 'compiling', 'running'):
                 break
             time.sleep(.1)
         if result['status'] != 'completed' or not result['results'] or result['results'][0]['status'] != 'passed':
             raise ValueError('Packaged Python execution failed: ' + result['status'])
         report['checks'].extend(['built-in catalog', 'native Python Unicode input and comparison'])
+        if toolchains_root:
+            from multilanguage_smoke import verify_server
+            report['multilanguage'] = verify_server(base, expected_data_dir=data, require_all=True)
+            report['checks'].append('five languages: compiled batch, interactive Unicode input/EOF and compile diagnostics')
         backup = request('/api/v1/backups', {})
         with opener.open(urllib.request.Request(base + backup['download_url'], headers=headers), timeout=10) as response:
             raw_backup = response.read()
@@ -126,7 +131,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
+    parser.add_argument('--toolchains-root', type=Path)
     args = parser.parse_args()
     if sys.platform != 'darwin':
         parser.error('Packaged Mac validation requires macOS')
-    verify_app(args.app, args.report)
+    verify_app(args.app, args.report, args.toolchains_root)

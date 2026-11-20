@@ -51,3 +51,11 @@ def test_macos_kernel_cpu_limit_maps_to_time_limit(tmp_path, monkeypatch):
     from app.paths import native_python
     result = native_process.execute_process(native_python(), script, wall_seconds=300)
     assert result['status'] == 'time_limit'
+
+
+def test_normal_source_entry_defaults_to_multilanguage_native(monkeypatch):
+    from app.runner.factory import runner_kind
+    monkeypatch.delenv('CODETOP_RUNNER', raising=False)
+    assert runner_kind() == 'native'
+    monkeypatch.setenv('CODETOP_RUNNER', 'docker')
+    assert runner_kind() == 'docker'
