@@ -26,7 +26,7 @@ def test_identity_scope_and_missing_fields(env, snapshot):
 
 def test_repeat_update_and_rollback_preserve_learning(loaded, snapshot):
     c, app, _, pid = loaded
-    c.put(f'/api/v1/problems/{pid}/note', json={'revision': 0, 'body_md': 'keep me', 'code_text': '', 'language': 'python'})
+    c.put(f'/api/v1/problems/{pid}/note/body', json={'revision': 0, 'body_md': 'keep me'})
     first = load(c, snapshot)
     assert len(c.get('/api/v1/catalog/datasets').json()) == 1
     updated = copy.deepcopy(snapshot)

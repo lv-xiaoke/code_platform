@@ -27,8 +27,12 @@ def get_state(conn, pid):
 
 
 def get_note(conn, pid):
+    from .code_drafts import draft_in, preference_in
     row = conn.execute(select(m.notes).where(m.notes.c.problem_id == pid)).mappings().first()
-    return dict(row) if row else dict(problem_id=pid, body_md='', code_text='', language='python', revision=0, updated_at='')
+    result = dict(row) if row else dict(problem_id=pid, body_md='', code_text='', language='python', revision=0, updated_at='')
+    draft = draft_in(conn, pid, preference_in(conn, pid)['language'])
+    return {**result, 'code_text': draft['code_text'], 'language': draft['language'],
+            'draft_revision': draft['revision'], 'draft_exists': draft['exists']}
 
 
 def completion_overrides(conn):
@@ -60,46 +64,22 @@ def save_state(conn, state, now):
 
 
 def put_note(db, pid, payload, now):
-    with db.write() as conn:
-        require_problem(conn, pid)
-        old = get_note(conn, pid)
-        if payload.revision != old['revision']: raise HTTPException(409, {'message':'笔记已在其他页面更新；你的编辑内容仍保留，请导出草稿后重新载入。', 'current':old})
-        result = {**old, **payload.model_dump(), 'revision': old['revision']+1, 'updated_at': utc_text(now)}
-        if old['revision']: conn.execute(update(m.notes).where(m.notes.c.problem_id == pid).values(**result))
-        else: conn.execute(insert(m.notes).values(**result))
-    return result
-
-
-def get_code_history(db, pid):
     with db.engine.connect() as conn:
         require_problem(conn, pid)
-        return [dict(row) for row in conn.execute(select(m.code_history).where(
-            m.code_history.c.problem_id == pid).order_by(m.code_history.c.id.desc())).mappings()]
+        raise HTTPException(409, {'message': '页面版本过旧，请导出当前输入并刷新；代码和笔记现已分别保存。', 'current': get_note(conn, pid)})
+
+
+def get_code_history(db, pid, language=None):
+    with db.engine.connect() as conn:
+        require_problem(conn, pid)
+        query = select(m.code_history).where(m.code_history.c.problem_id == pid)
+        if language is not None: query = query.where(m.code_history.c.language == language)
+        return [dict(row) for row in conn.execute(query.order_by(m.code_history.c.id.desc())).mappings()]
 
 
 def rewrite_code(db, pid, payload, now):
-    with db.write() as conn:
-        require_problem(conn, pid)
-        old = get_note(conn, pid)
-        if payload.revision != old['revision']:
-            raise HTTPException(409, '代码已在其他页面更新，当前草稿仍保留；请导出后载入服务器版本。')
-        target = None
-        if payload.history_id is not None:
-            target = conn.execute(select(m.code_history).where(
-                m.code_history.c.id == payload.history_id,
-                m.code_history.c.problem_id == pid)).mappings().first()
-            if target is None: raise HTTPException(404, '历史代码不存在')
-        if old['code_text'].strip():
-            conn.execute(insert(m.code_history).values(problem_id=pid, code_text=old['code_text'],
-                language=old['language'], created_at=utc_text(now)))
-        result = {**old, 'code_text': target['code_text'] if target else '',
-                  'language': target['language'] if target else old['language'],
-                  'revision': old['revision'] + 1, 'updated_at': utc_text(now)}
-        if old['revision']:
-            conn.execute(update(m.notes).where(m.notes.c.problem_id == pid).values(**result))
-        else:
-            conn.execute(insert(m.notes).values(**result))
-    return result
+    from .code_drafts import rewrite
+    return rewrite(db, pid, payload, now)
 
 
 def patch_state(db, pid, payload, now):

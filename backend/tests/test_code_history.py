@@ -10,15 +10,20 @@ from app.main import create_app
 
 
 def save(c, pid, revision, code, language='python'):
-    response = c.put(f'/api/v1/problems/{pid}/note', json={
-        'revision': revision, 'body_md': '保留思路', 'code_text': code, 'language': language})
+    note = c.get(f'/api/v1/problems/{pid}').json()['note']
+    if not note['revision']:
+        assert c.put(f'/api/v1/problems/{pid}/note/body', json={'revision': 0, 'body_md': '保留思路'}).status_code == 200
+    pref = c.get(f'/api/v1/problems/{pid}/code/preference').json()
+    assert c.put(f'/api/v1/problems/{pid}/code/preference', json={'revision': pref['revision'], 'language': language}).status_code == 200
+    response = c.put(f'/api/v1/problems/{pid}/code/drafts/{language}', json={
+        'revision': revision, 'code_text': code})
     assert response.status_code == 200, response.text
     return response.json()
 
 
-def rewrite(c, pid, revision, history_id=None):
+def rewrite(c, pid, revision, history_id=None, language='python'):
     return c.post(f'/api/v1/problems/{pid}/code/rewrite', json={
-        'revision': revision, 'history_id': history_id})
+        'revision': revision, 'language': language, 'history_id': history_id})
 
 
 def history(c, pid):
@@ -33,8 +38,8 @@ def test_rewrite_archives_versions_and_restart_keeps_draft(loaded):
     save(c, pid, 0, 'print(1)')
     first = rewrite(c, pid, 1)
     assert first.status_code == 200, first.text
-    assert first.json()['code_text'] == ''
-    assert first.json()['body_md'] == '保留思路'
+    assert first.json()['draft']['code_text'] == ''
+    assert c.get(f'/api/v1/problems/{pid}').json()['note']['body_md'] == '保留思路'
     save(c, pid, 2, 'print(2)')
     now[0] += timedelta(seconds=1)
     assert rewrite(c, pid, 3).status_code == 200
@@ -59,16 +64,17 @@ def test_blank_rewrite_does_not_create_history(loaded):
 def test_restore_archives_current_and_keeps_original_history_immutable(loaded):
     c, _, _, pid = loaded
     save(c, pid, 0, 'console.log(1)', 'javascript')
-    assert rewrite(c, pid, 1).status_code == 200
+    assert rewrite(c, pid, 1, language='javascript').status_code == 200
     original = history(c, pid)[0]
-    save(c, pid, 2, 'print(2)')
-    response = rewrite(c, pid, 3, original['id'])
+    save(c, pid, 0, 'print(2)')
+    save(c, pid, 2, 'console.log(2)', 'javascript')
+    response = rewrite(c, pid, 3, original['id'], language='javascript')
     assert response.status_code == 200, response.text
-    assert response.json()['code_text'] == 'console.log(1)'
-    assert response.json()['language'] == 'javascript'
-    assert response.json()['body_md'] == '保留思路'
+    assert response.json()['draft']['code_text'] == 'console.log(1)'
+    assert response.json()['draft']['language'] == 'javascript'
+    assert c.get(f'/api/v1/problems/{pid}/code/drafts/python').json()['code_text'] == 'print(2)'
     versions = history(c, pid)
-    assert versions[0]['code_text'] == 'print(2)'
+    assert versions[0]['code_text'] == 'console.log(2)'
     assert versions[1] == original
 
 
@@ -110,7 +116,7 @@ def test_archive_and_clear_roll_back_together(loaded):
     save(c, pid, 0, 'must survive')
 
     def fail_update(conn, cursor, statement, parameters, context, executemany):
-        if statement.startswith('UPDATE notes'):
+        if statement.startswith('UPDATE code_drafts'):
             raise RuntimeError('simulated storage failure')
 
     event.listen(app.state.db.engine, 'before_cursor_execute', fail_update)

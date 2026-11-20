@@ -12,8 +12,8 @@ from sqlalchemy.exc import OperationalError, IntegrityError
 
 from . import __version__
 from .db import Database, ROOT, SCHEMA_VERSION
-from .schemas import NoteWrite, StateWrite, AttemptWrite, CodeRewrite
-from . import catalog, imports, learning
+from .schemas import NoteWrite, StateWrite, AttemptWrite, CodeRewrite, DraftWrite, NoteBodyWrite, LanguagePreferenceWrite
+from . import catalog, imports, learning, code_drafts
 from .backups import create_backup
 from .runtime import RuntimeLock
 from .scheduler import TZ
@@ -161,11 +161,26 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     @app.put('/api/v1/problems/{pid}/note')
     def note(pid:str, payload:NoteWrite): return learning.put_note(db,pid,payload,now())
 
+    @app.put('/api/v1/problems/{pid}/note/body')
+    def note_body(pid:str, payload:NoteBodyWrite): return code_drafts.put_body(db,pid,payload,now())
+
+    @app.get('/api/v1/problems/{pid}/code/drafts/{language}')
+    def draft_get(pid:str, language:str): return code_drafts.get_draft(db,pid,language)
+
+    @app.put('/api/v1/problems/{pid}/code/drafts/{language}')
+    def draft_put(pid:str, language:str, payload:DraftWrite): return code_drafts.put_draft(db,pid,language,payload,now())
+
+    @app.get('/api/v1/problems/{pid}/code/preference')
+    def preference_get(pid:str): return code_drafts.get_preference(db,pid)
+
+    @app.put('/api/v1/problems/{pid}/code/preference')
+    def preference_put(pid:str, payload:LanguagePreferenceWrite): return code_drafts.put_preference(db,pid,payload,now())
+
     @app.patch('/api/v1/problems/{pid}/state')
     def state(pid:str, payload:StateWrite): return learning.patch_state(db,pid,payload,now())
 
     @app.get('/api/v1/problems/{pid}/code/history')
-    def code_history(pid:str): return learning.get_code_history(db,pid)
+    def code_history(pid:str, language:str | None=None): return learning.get_code_history(db,pid,language)
 
     @app.post('/api/v1/problems/{pid}/code/rewrite')
     def code_rewrite(pid:str, payload:CodeRewrite): return learning.rewrite_code(db,pid,payload,now())

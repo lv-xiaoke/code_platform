@@ -46,8 +46,9 @@ def export_fixture(output):
         client.headers.update({'X-Session-Token': token, 'Origin': 'http://127.0.0.1:8000'})
         pid = client.get('/api/v1/problems').json()['items'][0]['id']
         actions = [
-            client.put(f'/api/v1/problems/{pid}/note', json={'revision': 0, 'body_md': '跨平台笔记 🍎', 'code_text': 'print("你好")'}),
-            client.post(f'/api/v1/problems/{pid}/code/rewrite', json={'revision': 1}),
+            client.put(f'/api/v1/problems/{pid}/note/body', json={'revision': 0, 'body_md': '跨平台笔记 🍎'}),
+            client.put(f'/api/v1/problems/{pid}/code/drafts/python', json={'revision': 0, 'code_text': 'print("你好")'}),
+            client.post(f'/api/v1/problems/{pid}/code/rewrite', json={'revision': 1, 'language': 'python'}),
             client.patch(f'/api/v1/problems/{pid}/state', json={'revision': 0, 'favorite': True, 'done': True}),
             client.put(f'/api/v1/problems/{pid}/test-cases', json={'revision': 0, 'cases': [{'stdin': '你好\n', 'expected_stdout': '你好\n'}]}),
         ]
