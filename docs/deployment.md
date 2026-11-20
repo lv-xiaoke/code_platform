@@ -1,5 +1,14 @@
 # 安装、部署与常见问题
 
+普通用户优先使用已内置 Python 和题库的安装包：
+
+| 平台 | 下载入口 | 安装与启动 |
+| --- | --- | --- |
+| Windows 10 / 11 x64 | [v1.6.0 正式版](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0) | 运行 EXE 安装向导，再打开桌面“CodeTop 刷题” |
+| Mac M 系列 / Intel | [v1.6.0-macos-test.1 免费测试版](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1) | 选择对应架构 DMG，将应用拖入 Applications，再打开 CodeTop |
+
+完整应用运行练习无需安装 Docker。Mac 测试版未经过 Apple 公证；源码、旧 Windows 体验 ZIP 和构建工具的准备方式见下文。
+
 ## macOS 构建与使用
 
 免费测试版下载见 [v1.6.0-macos-test.1](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)。M 系列下载 `arm64-unsigned.dmg`，Intel 下载 `x86_64-unsigned.dmg`，打开 DMG 后将 CodeTop.app 拖入 Applications。M 系列在 macOS 15.8.2、Intel 在 macOS 15.7.9 的 GitHub 环境完成构建及应用内自动验证。
@@ -8,7 +17,7 @@
 
 ### 从源码启动（Mac）
 
-维护者需要 Python 3.12.13、Node 24.10.0、Bun 1.3.5；普通用户使用未来的完整应用时无需这些工具。在项目根目录执行：
+维护者需要 Python 3.12.13、Node 24.10.0、Bun 1.3.5；下载 DMG 使用的用户无需这些工具。在项目根目录执行：
 
 ```bash
 python3.12 -m venv backend/.venv
@@ -50,11 +59,13 @@ runtime/macos-build-env/bin/python scripts/build_macos.py \
 
 完整 Mac 应用的数据、备份和日志位于 `~/Library/Application Support/CodeTopLocal/`，升级应用文件不覆盖学习数据。AI Key 保存在系统钥匙串，不随学习备份迁移；不同数据目录分别关联凭据。钥匙串拒绝访问时不会降级为明文文件。
 
-Windows/Mac 使用相同的学习备份格式；恢复后重新配置 AI Key。本机练习可以访问当前用户文件和网络。Mac 使用进程组管理及 RSS 采样监测，256 MiB 是监测阈值，可能短暂超出，与 Windows Job Object 硬限制不同；本机模式不提供恶意代码隔离。普通样例 2 秒墙钟、交互模式 300 秒墙钟，CPU 预算 3 秒，输入与输出各 64 KiB。需要原有 Docker 模式的用户仍可显式设置 CODETOP_RUNNER=docker。
+Windows/Mac 使用相同的学习备份格式；跨设备恢复后重新配置 AI Key。本机练习可以访问当前用户文件和网络。Mac 使用进程组管理及 RSS 采样监测，256 MiB 是监测阈值，可能短暂超出，与 Windows Job Object 硬限制不同；本机模式不提供恶意代码隔离。普通样例 2 秒墙钟、交互模式 300 秒墙钟，CPU 预算 3 秒，输入与输出各 64 KiB。Mac 应用及 start-macos.sh 固定使用本机执行器；需要 Docker 模式的开发者可从 backend 目录设置 CODETOP_RUNNER=docker 后直接运行 app.serve。
 
 ---
 
-CodeTop Local 当前验证目标是 Windows 10 / 11 x64 的个人本机使用。建议将目录放在可写的本地磁盘，例如 `D:\Apps\CodeTop-Local`。支持中文和空格路径；不要直接在 ZIP 内启动，也不要复制另一台机器的 `.venv` 使用。
+## Windows 安装与源码部署
+
+Windows 正式版面向 Windows 10 / 11 x64 的个人本机使用。源码或旧体验 ZIP 请解压到可写的本地目录，例如 `D:\Apps\CodeTop-Local`。支持中文和空格路径；不要直接在 ZIP 内启动，也不要复制另一台机器的 `.venv` 使用。
 
 ## 安装前需要什么
 
@@ -69,7 +80,7 @@ CodeTop Local 当前验证目标是 Windows 10 / 11 x64 的个人本机使用。
 | Windows 体验包 | uv、网络；脚本准备 Python 3.12 与后端依赖 | 双击 Start-CodeTop.cmd |
 | 源码 | uv、Node.js/npm、网络；Git 或源码 ZIP | 同上 |
 
-**两种安装方式要运行练习代码，都必须额外安装并启动 Docker Desktop，使用 Linux 容器并准备项目指定镜像。** 仅浏览题库、记录笔记或编辑代码时无需 Docker；应用后端的 Python 环境不替代 Docker 运行环境。
+旧体验 ZIP 和普通 Windows 源码入口默认使用 Docker 运行练习，需要启动 Docker Desktop 的 Linux 容器并准备指定镜像。源码开发者也可在启动前设置 `$env:CODETOP_RUNNER='native'`，使用当前 Python 3.12 本机执行器；完整 Windows 安装包和 Mac DMG 已内置本机运行时，无需 Docker。仅浏览题库、记录笔记或编辑代码时也无需 Docker。
 
 先运行 `uv --version`：能显示版本号说明已安装，无需重复安装。提示找不到命令时，可参考 [官方安装文档](https://docs.astral.sh/uv/getting-started/installation/)，WinGet 命令为 `winget install --id=astral-sh.uv -e`。安装完成后重新打开终端，运行 `uv --version` 确认 PATH 生效。Python 3.12 由 uv 按需获取。
 
@@ -99,7 +110,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Bui
 
 安装过程不会重置已有题库和学习记录。看到 `Setup complete` 后双击 `Start-CodeTop.cmd`。浏览器打开 `http://127.0.0.1:8000`，默认显示内置题单。
 
-## Python 代码运行环境（运行代码必需）
+## Docker 代码运行环境（仅 Docker 模式）
 
 按 [Docker Desktop Windows 官方安装说明](https://docs.docker.com/desktop/setup/install/windows-install/)完成安装及所需系统配置。已经安装的用户无需重复安装，打开 Docker Desktop 并等待引擎启动，确认使用 Linux 容器：`docker version` 应显示 Client 和 Server，`docker info --format '{{.OSType}}'` 应返回 `linux`。然后在项目根目录执行：
 
@@ -115,11 +126,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-runner.p
 
 打开页面设置或练习面板中的“AI 设置”，输入自己的 DeepSeek Key，保存并测试连接。AI 调用需要联网，发送所选题面、代码和问题等上下文。界面模型能否使用以自己的 DeepSeek 账户为准。
 
-Key 以 Windows DPAPI 加密存放在 `data/ai-key.dpapi`，不包含在学习备份中。新目录或新电脑恢复学习备份后，重新配置 Key。不要把整个 `data/` 目录作为软件包分享。
+Windows 的 Key 使用 DPAPI 加密，保存为当前数据目录下的 `ai-key.dpapi`：完整安装包位于 `%LOCALAPPDATA%\CodeTopLocal`，源码默认位于项目 `data/`。Mac 使用系统钥匙串，不生成 DPAPI 文件。Key 均不包含在学习备份中；换电脑或更换数据目录后重新配置。不要把整个数据目录作为软件包分享。
 
 ## 启动、退出和端口
 
-日常启动：`Start-CodeTop.cmd`。关闭最后一个 CodeTop 标签页后，服务约 5 秒内退出。重复启动会复用同目录、同数据目录的服务。
+Windows 完整安装包从桌面“CodeTop 刷题”启动，源码或旧体验 ZIP 使用 `Start-CodeTop.cmd`；Mac 打开 Applications 中的 CodeTop。关闭最后一个 CodeTop 标签页后，服务约 5 秒内退出。重复启动会复用同应用、同数据目录的服务。下面的 PowerShell 端口与停止命令适用于 Windows 源码/体验 ZIP。
 
 默认端口被其他程序占用时：
 
@@ -149,7 +160,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1 -NoB
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\backup.ps1
 ```
 
-自动与命令行备份保存在 `data/backups/`，内容包括一致性数据库、来源文件、校验信息和代码历史，不包含 AI Key。不要只复制运行中的 `study.sqlite3` 文件。
+自动备份保存在当前数据目录的 `backups/` 下：Windows 安装包为 `%LOCALAPPDATA%\CodeTopLocal\backups`，Mac 为 `~/Library/Application Support/CodeTopLocal/backups/`，源码默认是 `data/backups/`。内容包括一致性数据库、来源文件、校验信息和代码历史，不包含 AI Key。不要只复制运行中的 `study.sqlite3` 文件。
+
+Windows 与 Mac 完整应用都可在页面“设置 → 完整备份”预览并确认恢复，恢复后服务重启。以下新目录升级和 PowerShell 恢复命令用于 Windows 源码/旧体验 ZIP。
 
 升级推荐新目录安装，保留旧目录，然后恢复完整备份：
 
@@ -176,7 +189,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\restore.ps1 -A
 | AI 无法连接 | 在 AI 设置测试连接，检查自己的 Key、账户余额、模型权限和网络 |
 | PowerShell 阻止直接执行 ps1 | 使用 CMD 入口，或按文档的 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ...` 运行，无需永久修改执行策略 |
 
-服务日志位于 `runtime/server-*.log`、`runtime/server-*.err.log`。反馈问题时提供操作步骤与相关错误日志，隐藏个人数据和 Key。
+完整应用日志位于用户数据目录的 `logs/` 下，Windows 源码/体验 ZIP 的启动日志位于项目 `runtime/server-*.log`、`runtime/server-*.err.log`。反馈问题时提供操作步骤与相关错误日志，隐藏个人数据和 Key。
 
 ## 维护者：生成发布包
 
