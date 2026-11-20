@@ -38,7 +38,7 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
 2. 双击安装包，按向导完成安装。
 3. 双击桌面的 **CodeTop 刷题**，即可开始使用。
 
-macOS 适配代码及构建入口已加入，当前尚无经过 Mac 实机验收的正式安装包。维护者可在 Mac 上构建 Apple Silicon / Intel 测试包，详见[macOS 构建与使用](docs/deployment.md#macos-构建与使用)和[验收记录](docs/macos-validation.md)。
+macOS 免费测试版见 [Mac 测试版下载](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)：M 系列选择 `arm64-unsigned.dmg`，Intel 选择 `x86_64-unsigned.dmg`。测试版未经过 Apple 公证，首次打开可能被 macOS 拦截；安装说明见[macOS 使用与构建](docs/deployment.md#macos-构建与使用)，自动验证范围见[验收记录](docs/macos-validation.md)。
 
 ## 数据、备份与更新
 

@@ -2,7 +2,9 @@
 
 ## macOS 构建与使用
 
-当前提供源码和维护者构建流程，**尚未在 Mac 上构建、实机验收或发布正式安装包**。Apple Silicon 与 Intel 分别生成安装包，不依赖 Rosetta；最低 macOS 13 是构建目标，需要对应系统验证后才能承诺兼容。执行记录见 [macOS 验收](macos-validation.md)。
+免费测试版下载见 [v1.6.0-macos-test.1](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)。M 系列下载 `arm64-unsigned.dmg`，Intel 下载 `x86_64-unsigned.dmg`，打开 DMG 后将 CodeTop.app 拖入 Applications。M 系列在 macOS 15.8.2、Intel 在 macOS 15.7.9 的 GitHub 环境完成构建及应用内自动验证。
+
+测试版未使用付费 Developer ID、未经过 Apple 公证，首次打开可能被系统拦截。请核对下载来源及 SHA-256，并参考 [Apple 官方安全打开 App 的说明](https://support.apple.com/zh-cn/102445)。用户无需开通 Apple 开发者账号。Finder、浏览器界面及干净电脑安装仍需实机反馈；macOS 13 只是构建目标，尚未在该系统版本验收。执行记录见 [macOS 验收](macos-validation.md)。
 
 ### 从源码启动（Mac）
 
