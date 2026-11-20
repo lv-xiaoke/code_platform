@@ -18,7 +18,7 @@ def test_desktop_assets_exclude_personal_files_and_old_builds(tmp_path, monkeypa
     source, target = tmp_path / 'source', tmp_path / 'output'
     files = {
         'README.md': 'readme', 'THIRD_PARTY_NOTICES.md': 'notices',
-        'docs/deployment.md': 'deploy', 'docs/user-guide.md': 'guide',
+        'docs/deployment.md': 'deploy', 'docs/user-guide.md': 'guide', 'docs/multilanguage-acceptance.md': 'validation',
         'frontend/LICENSE': 'MIT', 'vendor/algoTop-main/LICENSE': 'MIT',
         'vendor/algoTop-main/public/data/codetop.json': '{}',
         'backend/migrations/env.py': '# migration',

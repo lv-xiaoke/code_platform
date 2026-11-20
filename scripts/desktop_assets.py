@@ -19,7 +19,7 @@ def copy_assets(root, stage):
     files = set()
     for pattern in patterns:
         files.update(root.glob(pattern))
-    for relative in ('README.md', 'THIRD_PARTY_NOTICES.md', 'docs/deployment.md', 'docs/user-guide.md', 'packaging/toolchains.json',
+    for relative in ('README.md', 'THIRD_PARTY_NOTICES.md', 'docs/deployment.md', 'docs/user-guide.md', 'docs/multilanguage-acceptance.md', 'packaging/toolchains.json',
                      'frontend/LICENSE', 'vendor/algoTop-main/LICENSE', 'vendor/algoTop-main/public/data/codetop.json'):
         files.add(root / relative)
     marker = root / 'releases/current.json'

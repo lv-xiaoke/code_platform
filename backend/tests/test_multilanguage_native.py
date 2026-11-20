@@ -14,7 +14,7 @@ SOURCES = {
 LIMIT_SOURCES = {
     'python': ('while True: pass', 'while True: print("x"*8192)', 'a=[]\nwhile True:a.append(bytearray(20*1024*1024))'),
     'c': ('int main(void){volatile unsigned n=0;for(;;)n++;}', '#include <stdio.h>\nint main(void){for(;;)puts("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");}', '#include <stdlib.h>\nint main(void){for(;;){volatile char*p=(volatile char*)malloc(20*1024*1024);if(!p)return 2;for(int i=0;i<20*1024*1024;i+=4096)p[i]=1;}}'),
-    'cpp': ('int main(){volatile unsigned n=0;for(;;)n++;}', '#include <iostream>\nint main(){for(;;)std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;}', '#include <vector>\nint main(){std::vector<char> a(400*1024*1024,1);return a[0];}'),
+    'cpp': ('int main(){volatile unsigned n=0;for(;;)n++;}', '#include <iostream>\nint main(){for(;;)std::cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<std::endl;}', '#include <vector>\nint main(){std::vector<char> a(400*1024*1024);volatile char*p=a.data();for(;;)for(std::size_t i=0;i<a.size();i+=4096)p[i]=1;}'),
     'java': ('public class Main{public static void main(String[]a){while(true){}}}', 'public class Main{public static void main(String[]a){while(true)System.out.println("x".repeat(8192));}}', 'public class Main{public static void main(String[]a){byte[] x=new byte[256*1024*1024];System.out.println(x.length);}}'),
     'javascript': ('while(true){}', 'while(true)require("fs").writeSync(1,"x".repeat(8192))', 'let a=[];while(true)a.push(new Array(1e6).fill(1))'),
 }

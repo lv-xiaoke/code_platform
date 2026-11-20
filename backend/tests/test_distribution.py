@@ -60,7 +60,7 @@ def source(tmp_path):
         'vendor/algoTop-main/LICENSE': 'MIT',
         'vendor/algoTop-main/public/data/codetop.json': '{"questions":{}}',
         'frontend/LICENSE': 'MIT',
-        'docs/deployment.md': '# Deploy', 'docs/user-guide.md': '# Guide',
+        'docs/deployment.md': '# Deploy', 'docs/user-guide.md': '# Guide', 'docs/multilanguage-acceptance.md': '# Validation',
         'releases/current.json': json.dumps({'path': 'releases/test-build', 'version': '1.5.0'}),
         'releases/test-build/index.html': '<html>CodeTop</html>',
         'releases/test-build/assets/app.js': 'console.log(1)',
