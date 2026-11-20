@@ -1,5 +1,7 @@
 # macOS 验收记录
 
+当前多语言源码分支的最终三平台记录见 [多语言验收](multilanguage-acceptance.md)，CI [44676286322](https://github.com/lv-xiaoke/code_platform/actions/runs/44676286322) 已通过两种 Mac 实际 app 的五语言验证。下文保留 v1.6.0 已发布 Python 测试包的原始验收历史；多语言功能尚未发布到 Release。
+
 ## 当前交付状态
 
 2026-11-20：Apple Silicon 在 macOS 15.8.2、Intel 在 macOS 15.7.9 的 GitHub 环境构建，通过两种架构各 **147 项后端测试**及打包应用冒烟测试；Windows 构建验证与三平台备份互通作业也全部通过。下载见 [v1.6.0-macos-test.1](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)，测试代码提交为 `14f4fcada270710193492fd0e4e28f312a8d498f`，证据见 [CI 44659301119](https://github.com/lv-xiaoke/code_platform/actions/runs/44659301119)。本测试版使用 ad hoc 签名，未使用 Developer ID，也未经过 Apple 公证。

@@ -2,7 +2,7 @@
 
 日期：2026-11-20
 
-状态：用户已通过“开始修改”确认本设计规格；实施计划见 [2026-11-20-multilanguage.md](../plans/2026-11-20-multilanguage.md)，产品代码尚未修改。
+状态：设计已确认，产品实现和三平台自动验收已完成。实施计划见 [2026-11-20-multilanguage.md](../plans/2026-11-20-multilanguage.md)；人工验收边界与已知次要问题见 [验收记录](../../multilanguage-acceptance.md)。
 
 ## 目标和范围
 

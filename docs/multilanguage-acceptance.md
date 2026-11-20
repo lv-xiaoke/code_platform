@@ -14,11 +14,11 @@
 
 Windows x64：官方 Node 24.22.3、Temurin 21.0.13+9、LLVM-MinGW 20261117 已下载、核验 SHA-256 并完成基础编译运行。工具链测试根为仓库 `runtime/toolchains-ci`，未改写全局环境或用户学习数据。
 
-本地最终自动检查：后端 **202 passed / 33 skipped**；前端 **51 passed**，TypeScript 检查及 `scripts/build.ps1` 成功。后端跳过项主要为 Mac 专属能力、Docker 真实环境及 Windows 无符号链接权限的测试；跳过不代表该平台已验收。第一轮完整通过的跨平台 CI 为 [44673264981](https://github.com/lv-xiaoke/code_platform/actions/runs/44673264981)，覆盖三平台测试、两种 Mac 实际应用与三平台备份互换；审查修复后的最终运行记录将在结束时补充。
+本地最终自动检查：后端 **202 passed / 33 skipped**；前端 **51 passed**，TypeScript 检查及 `scripts/build.ps1` 成功。后端跳过项主要为 Mac 专属能力、Docker 真实环境及 Windows 无符号链接权限的测试；跳过不代表该平台已验收。最终跨平台 CI 为 [44676286322](https://github.com/lv-xiaoke/code_platform/actions/runs/44676286322)，测试提交 `8f25ba2`，6 个任务全部通过。Windows 为 203 passed / 32 skipped，Mac arm64 与 Intel 均为 209 passed / 26 skipped；三个平台前端均为 51 passed。两种 Mac 的实际 app 已验证五语言编译/交互及恢复重启，三平台均完成全部备份互换。
 
 真实五语言测试已覆盖 Unicode、多样例、编译一次、交互 stdin/EOF、编译失败、停止及编译期间关闭。五语言超时、内存和输出限制真实用例全部通过，计入上述全量结果。
 
-普通入口 `Start-CodeTop.cmd -NoBrowser` 已通过独立数据验证：schema 0004、五语言多样例、交互 Unicode/EOF、C/C++/Java 编译错误；HTTP 返回的页面与当前 release HTML 字节一致。此项不代表浏览器点击和视觉验收。
+普通入口 `Start-CodeTop.cmd -NoBrowser` 已通过独立数据验证：schema 0004、五语言多样例、交互 Unicode/EOF、C/C++/Java 编译错误；HTTP 返回的页面与当前 release HTML 字节一致。此项不代表浏览器点击和视觉验收。审查修复后的 Windows 冻结应用也通过相同五语言验证，构建目录为 `runtime/desktop-build-20261120-123820-91fe93/frozen/CodeTop`；当前前端 release 为 `releases/20261120-123352-f9463d90`。最终源入口及冻结应用报告分别保留在 `runtime/multilanguage-source-reviewed-report.json` 和 `runtime/multilanguage-frozen-reviewed-report.json`。
 
 ## 自动验证入口
 
