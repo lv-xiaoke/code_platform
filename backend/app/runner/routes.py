@@ -45,7 +45,11 @@ def run(pid:str,payload:RunWrite,request:Request): return request.app.state.run_
 
 
 @router.get('/problems/{pid}/runs')
-def history(pid:str,request:Request): return request.app.state.run_service.history(pid)
+def history(pid:str,request:Request,language:str | None=None): return request.app.state.run_service.history(pid,language)
+
+
+@router.post('/run-requests/{request_id}/stop')
+def run_stop(request_id:str,request:Request): return request.app.state.run_service.stop_request(request_id)
 
 
 @router.get('/runs/{run_id}')

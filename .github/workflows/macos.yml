@@ -1,8 +1,8 @@
-name: macOS support and backup exchange
+name: Desktop languages and backup exchange
 
 on:
   push:
-    branches: [codex/macos-support]
+    branches: [codex/macos-support, codex/multilanguage]
   pull_request:
   workflow_dispatch:
 
@@ -22,6 +22,10 @@ jobs:
           - runner: macos-15-intel
             arch: x86_64
     runs-on: ${{ matrix.runner }}
+    env:
+      CODETOP_TOOLCHAINS_DIR: ${{ github.workspace }}/runtime/toolchains-ci
+      CODETOP_TEST_TOOLCHAINS: ${{ github.workspace }}/runtime/toolchains-ci
+      CODETOP_REQUIRE_LANGUAGES: '1'
     defaults:
       run:
         shell: bash
@@ -55,6 +59,8 @@ jobs:
           "$CODETOP_PYTHON" -m pip install -r packaging/build-requirements.lock.txt
           cd frontend
           bun install --frozen-lockfile
+      - name: Prepare pinned language toolchains
+        run: '"$CODETOP_PYTHON" scripts/prepare_toolchains.py --languages python,c,cpp,java,javascript --root "$CODETOP_TOOLCHAINS_DIR" --require-ready'
       - name: Backend verification
         run: '"$CODETOP_PYTHON" -m pytest -c backend/pytest.ini backend/tests -q --tb=short'
       - name: Frontend tests and release build
@@ -83,7 +89,8 @@ jobs:
           moved.parent.mkdir(parents=True)
           subprocess.run(['/usr/bin/ditto', str(app), str(moved)], check=True)
           subprocess.run([sys.executable, 'scripts/verify_macos.py', '--app', str(moved),
-                          '--report', str(report.parent / 'smoke-report.json')], check=True)
+                          '--report', str(report.parent / 'smoke-report.json'),
+                          '--toolchains-root', str(pathlib.Path('runtime/toolchains-ci').resolve())], check=True)
           PY
       - uses: actions/upload-artifact@v4
         if: always() && runner.os == 'macOS'

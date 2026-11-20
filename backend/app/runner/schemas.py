@@ -33,13 +33,13 @@ class SuiteWrite(StrictModel):
 class RunWrite(StrictModel):
     request_id: str = Field(min_length=1,max_length=128)
     source_code: str = Field(min_length=1,max_length=200000)
-    language: Literal['python']='python'
+    language: Literal['python','c','cpp','java','javascript']='python'
     mode: Literal['custom','suite']='custom'
     cases: list[TestCase] = Field(default_factory=list,max_length=20)
 
     @model_validator(mode='after')
     def valid_mode(self):
-        if not self.source_code.strip(): raise ValueError('请先编写 Python 代码')
+        if not self.source_code.strip(): raise ValueError('请先编写代码')
         if self.mode=='custom' and not self.cases: raise ValueError('自定义运行至少需要一组输入')
         if self.mode=='suite' and self.cases: raise ValueError('全部测试使用服务器已保存的用例')
         return self
@@ -48,10 +48,11 @@ class RunWrite(StrictModel):
 class TerminalStart(StrictModel):
     request_id: str = Field(min_length=1,max_length=128)
     source_code: str = Field(min_length=1,max_length=200000)
+    language: Literal['python','c','cpp','java','javascript']='python'
 
     @model_validator(mode='after')
     def not_blank(self):
-        if not self.source_code.strip(): raise ValueError('请先编写 Python 代码')
+        if not self.source_code.strip(): raise ValueError('请先编写代码')
         return self
 
 

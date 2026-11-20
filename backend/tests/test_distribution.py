@@ -22,6 +22,46 @@ def test_health_declares_utf8_for_windows_powershell_paths(tmp_path):
         assert response.json()['root'] == str(root.resolve())
 
 
+@pytest.mark.skipif(__import__('sys').platform != 'win32', reason='Windows source launcher')
+def test_launcher_rejects_old_server_without_killing_it(tmp_path):
+    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    from app.db import SCHEMA_VERSION
+    import threading
+    import venv
+    source=tmp_path/'source'
+    (source/'scripts').mkdir(parents=True)
+    for filename in ('start.ps1','common.ps1'):
+        shutil.copy2(ROOT/'scripts'/filename,source/'scripts'/filename)
+    venv.EnvBuilder(with_pip=False).create(source/'backend/.venv')
+    (source/'backend/app').mkdir()
+    (source/'backend/app/__init__.py').write_text('')
+    (source/'backend/app/db.py').write_text('SCHEMA_VERSION = '+repr(SCHEMA_VERSION),encoding='utf-8')
+    (source/'releases').mkdir()
+    (source/'releases/current.json').write_text('{}')
+    data=tmp_path/'data'
+    class Health(BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = json.dumps({'app':'codetop-local','root':str(source),'data_dir':str(data),
+                'schema_version':'0003','process_id':1}).encode()
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(body)
+        def log_message(self,*args): pass
+    server=ThreadingHTTPServer(('127.0.0.1',0),Health)
+    thread=threading.Thread(target=server.serve_forever,daemon=True)
+    thread.start()
+    try:
+        result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(source/'scripts/start.ps1'),
+            '-Port',str(server.server_port),'-DataDir',str(data),'-NoBrowser'],capture_output=True,timeout=20)
+        assert result.returncode != 0
+        assert b'different database schema' in result.stderr
+        assert b'Close all CodeTop tabs' in result.stderr
+        assert thread.is_alive()
+    finally:
+        server.shutdown();server.server_close();thread.join(3)
+
+
 def test_seed_is_not_ignored_by_git():
     if not (ROOT / '.git').exists() or not shutil.which('git'):
         pytest.skip('Git checkout required; source ZIPs have no ignore metadata')
@@ -54,13 +94,13 @@ def source(tmp_path):
         'scripts/setup-runner.ps1': '# runner',
         'backend/app/__init__.py': "__version__ = '1.5.0'",
         'backend/migrations/env.py': '# migration',
-        'backend/runner/runtime.json': '{}', 'backend/runner/worker.py': '# worker',
+        'backend/runner/runtime.json': '{}', 'backend/runner/worker.py': '# worker', 'packaging/toolchains.json': '{}',
         'backend/requirements.lock.txt': 'fastapi==0.156.4',
         'backend/reference_pack/manifest.json': '{}',
         'vendor/algoTop-main/LICENSE': 'MIT',
         'vendor/algoTop-main/public/data/codetop.json': '{"questions":{}}',
         'frontend/LICENSE': 'MIT',
-        'docs/deployment.md': '# Deploy', 'docs/user-guide.md': '# Guide',
+        'docs/deployment.md': '# Deploy', 'docs/user-guide.md': '# Guide', 'docs/multilanguage-acceptance.md': '# Validation',
         'releases/current.json': json.dumps({'path': 'releases/test-build', 'version': '1.5.0'}),
         'releases/test-build/index.html': '<html>CodeTop</html>',
         'releases/test-build/assets/app.js': 'console.log(1)',

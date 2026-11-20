@@ -7,9 +7,9 @@ from app.backups import create_backup, restore_backup, inspect_database
 
 def test_backup_preserves_learning_at_unrelated_path(loaded, tmp_path):
     c, app, _, pid = loaded
-    assert c.put(f'/api/v1/problems/{pid}/note', json={
-        'revision': 0, 'body_md': '跨平台笔记', 'code_text': 'print("历史")'}).status_code == 200
-    assert c.post(f'/api/v1/problems/{pid}/code/rewrite', json={'revision': 1}).status_code == 200
+    assert c.put(f'/api/v1/problems/{pid}/note/body', json={'revision': 0, 'body_md': '跨平台笔记'}).status_code == 200
+    assert c.put(f'/api/v1/problems/{pid}/code/drafts/python', json={'revision': 0, 'code_text': 'print("历史")'}).status_code == 200
+    assert c.post(f'/api/v1/problems/{pid}/code/rewrite', json={'revision': 1, 'language': 'python'}).status_code == 200
     state = c.get(f'/api/v1/problems/{pid}').json()['state']
     assert c.patch(f'/api/v1/problems/{pid}/state', json={
         'revision': state['revision'], 'favorite': True}).status_code == 200

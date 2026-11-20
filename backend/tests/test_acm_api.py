@@ -87,7 +87,7 @@ def test_suite_runs_only_saved_custom_cases(loaded):
 def test_run_validation(loaded):
     c,_,_,pid=loaded
     base={'request_id':str(uuid4()),'source_code':'print(0)','mode':'suite'}
-    for bad in [dict(base,request_id=str(uuid4()),language='javascript'),dict(base,request_id=str(uuid4()),mode='custom',cases=[]),dict(base,request_id=str(uuid4()),source_code='')]:
+    for bad in [dict(base,request_id=str(uuid4()),language='rust'),dict(base,request_id=str(uuid4()),mode='custom',cases=[]),dict(base,request_id=str(uuid4()),source_code='')]:
         assert c.post(f'/api/v1/problems/{pid}/runs',json=bad).status_code==422
     assert c.post('/api/v1/problems/missing/runs',json=base).status_code==404
 

@@ -11,8 +11,8 @@ def attempt(c, pid, request_id, outcome='independent'):
 
 def test_note_revision_and_restart(loaded):
     c, app, _, pid = loaded
-    path = f'/api/v1/problems/{pid}/note'
-    payload = {'revision': 0, 'body_md': '# 笔记', 'code_text': 'print(1)', 'language': 'python'}
+    path = f'/api/v1/problems/{pid}/note/body'
+    payload = {'revision': 0, 'body_md': '# 笔记'}
     assert c.put(path, json=payload).json()['revision'] == 1
     assert c.put(path, json=payload).status_code == 409
     second = create_app(data_dir=app.state.db.data_dir, bootstrap=False)
@@ -72,7 +72,7 @@ def test_concurrent_note_revisions_and_attempt_retries(loaded):
     from concurrent.futures import ThreadPoolExecutor
     c,_,_,pid=loaded
     with ThreadPoolExecutor(max_workers=2) as pool:
-        results=list(pool.map(lambda text:c.put(f'/api/v1/problems/{pid}/note',json={'revision':0,'body_md':text,'code_text':'','language':'python'}),['tab one','tab two']))
+        results=list(pool.map(lambda text:c.put(f'/api/v1/problems/{pid}/note/body',json={'revision':0,'body_md':text}),['tab one','tab two']))
     assert sorted(r.status_code for r in results)==[200,409]
     with ThreadPoolExecutor(max_workers=2) as pool:
         results=list(pool.map(lambda _:attempt(c,pid,'parallel'),range(2)))

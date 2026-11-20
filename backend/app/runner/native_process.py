@@ -7,6 +7,7 @@ import time
 import select
 
 from .. import platforms
+from .process_types import ProcessBudget
 
 LIMIT = 65536
 
@@ -18,19 +19,30 @@ def process_backend():
     if platforms.system_name() == 'windows':
         from .windows_job import JobProcess
         return JobProcess
-    raise ValueError('此系统暂不支持本机 Python 执行')
+    raise ValueError('此系统暂不支持本机代码执行')
 
 
 def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
                     on_output=None, wall_seconds=2, cpu_seconds=3):
-    stop_event = stop_event or threading.Event()
     env = {k: v for k, v in os.environ.items() if k.upper() in ('SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'COMSPEC', 'SYSTEMDRIVE')}
     env['PATH'] = str(python.parent)
     if platforms.system_name() == 'macos':
         for key in ('TMPDIR', 'LANG', 'LC_CTYPE'):
             if key in os.environ:
                 env[key] = os.environ[key]
-    process = process_backend()([python, '-I', '-S', '-B', '-u', '-X', 'utf8', script], script.parent, env)
+    return execute_command([python, '-I', '-S', '-B', '-u', '-X', 'utf8', script], script.parent, env,
+        budget=ProcessBudget(wall_seconds, cpu_seconds, 256, LIMIT), stdin=stdin, inputs=inputs,
+        stop_event=stop_event, on_output=on_output)
+
+
+def execute_command(argv, cwd, env, *, budget, stdin=None, inputs=None, stop_event=None, on_output=None):
+    stop_event = stop_event or threading.Event()
+    if stop_event.is_set():
+        return dict(status='stopped', stdout='', stderr='', exit_code=None, duration_ms=0)
+    if stdin is not None and len(stdin.encode('utf-8')) > LIMIT:
+        raise ValueError('输入超过 64 KiB')
+    process = process_backend()(argv, cwd, env, memory_mb=budget.memory_mb,
+        max_processes=budget.max_processes, cpu_seconds=budget.cpu_seconds)
     posix_pipes = os.name != 'nt'
     if posix_pipes:
         for stream in (process.stdin, process.stdout, process.stderr):
@@ -127,7 +139,7 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
                     status = 'stopped'
                 elif memory:
                     status = 'memory_limit'
-                elif time.monotonic() - started > wall_seconds or process.cpu_seconds() > cpu_seconds:
+                elif time.monotonic() - started > budget.wall_seconds or process.cpu_seconds() > budget.cpu_seconds:
                     status = 'time_limit'
                 if status != 'executed':
                     process.terminate()
@@ -144,14 +156,14 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
                 continue
             if data is None:
                 ended.add(name)
-                text = decoders[name].decode(b'', final=True) if total <= LIMIT else ''
+                text = decoders[name].decode(b'', final=True) if total <= budget.output_bytes else ''
             else:
-                kept = data[:max(0, LIMIT - total)]
+                kept = data[:max(0, budget.output_bytes - total)]
                 total += len(data)
                 buffers[name].extend(kept)
                 # Do not manufacture a replacement character from a truncated codepoint.
                 text = decoders[name].decode(kept, final=False)
-                if total > LIMIT and status == 'executed':
+                if total > budget.output_bytes and status == 'executed':
                     status = 'output_limit'
                     process.terminate()
             if text and on_output:
@@ -159,7 +171,8 @@ def execute_process(python, script, *, stdin=None, inputs=None, stop_event=None,
         process.limit_events()
         output = {name: value.decode('utf-8', errors='ignore') for name, value in buffers.items()}
         if status == 'executed':
-            if process.memory_exceeded or (exit_code and 'MemoryError' in output['stderr']):
+            if process.memory_exceeded or (exit_code and any(message in output['stderr'] for message in
+                    ('MemoryError', 'OutOfMemoryError', 'heap out of memory'))):
                 status = 'memory_limit'
             elif platforms.system_name() == 'macos' and exit_code == -24:  # Darwin SIGXCPU
                 status = 'time_limit'

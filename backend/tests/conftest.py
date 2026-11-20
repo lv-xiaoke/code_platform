@@ -49,7 +49,10 @@ def snapshot():
 
 
 @pytest.fixture
-def env(tmp_path):
+def env(tmp_path, monkeypatch):
+    # Business fixtures use their fake Docker protocol runners; native execution
+    # has separate real-process integration tests and explicit consent.
+    monkeypatch.setenv('CODETOP_RUNNER', 'docker')
     now = [datetime(2026, 10, 21, 10, tzinfo=timezone.utc)]
     app = create_app(data_dir=tmp_path, clock=lambda: now[0], bootstrap=False)
     with TestClient(app, base_url='http://127.0.0.1:8000') as client:

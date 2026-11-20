@@ -9,7 +9,7 @@ from app.db import Database
 
 def test_backup_roundtrip(loaded, tmp_path):
     c, app, _, pid = loaded
-    c.put(f'/api/v1/problems/{pid}/note', json={'revision': 0, 'body_md': 'restore me', 'code_text': '', 'language': 'python'})
+    assert c.put(f'/api/v1/problems/{pid}/note/body', json={'revision': 0, 'body_md': 'restore me'}).status_code == 200
     r = c.post('/api/v1/backups')
     assert r.status_code == 200, r.text
     path = app.state.db.data_dir / 'backups' / r.json()['filename']
@@ -38,10 +38,10 @@ def test_restore_rejects_traversal_and_hash_mismatch(loaded, tmp_path):
 
 def test_restore_into_existing_directory_preserves_rollback(loaded):
     c, app, _, pid = loaded
-    c.put(f'/api/v1/problems/{pid}/note', json={'revision':0,'body_md':'original','code_text':'','language':'python'})
+    c.put(f'/api/v1/problems/{pid}/note/body', json={'revision':0,'body_md':'original'})
     name=c.post('/api/v1/backups').json()['filename']
     source=app.state.db.data_dir/'backups'/name
-    c.put(f'/api/v1/problems/{pid}/note', json={'revision':1,'body_md':'newer','code_text':'','language':'python'})
+    c.put(f'/api/v1/problems/{pid}/note/body', json={'revision':1,'body_md':'newer'})
     app.state.db.engine.dispose()
     result=restore_backup(source, app.state.db.data_dir)
     assert result['notes']==1

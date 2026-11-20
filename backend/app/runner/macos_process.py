@@ -6,7 +6,7 @@ from ..paths import application_root
 
 
 class MacProcess:
-    def __init__(self, argv, cwd, env, *, memory_mb=256, max_processes=32):
+    def __init__(self, argv, cwd, env, *, memory_mb=256, max_processes=32, cpu_seconds=3):
         import psutil
         self.psutil = psutil
         self.memory_limit = memory_mb * 1024 * 1024
@@ -18,7 +18,9 @@ class MacProcess:
         bootstrap = application_root() / 'backend/runner/native_bootstrap.py'
         if not bootstrap.is_file():
             raise ValueError('本机执行启动文件缺失，请重新安装')
-        command = [*argv[:-1], str(bootstrap), str(argv[-1])]
+        from ..paths import native_python
+        command = [str(native_python()), '-I', '-S', '-B', str(bootstrap),
+                   '--cpu-seconds', str(cpu_seconds), '--', *map(str, argv)]
         self.process = subprocess.Popen(command, cwd=cwd, env=env, stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                         bufsize=0, start_new_session=True, close_fds=True)

@@ -37,6 +37,16 @@ def native_python():
     return Path(sys._base_executable).resolve()
 
 
+def toolchains_dir():
+    if os.environ.get('CODETOP_TOOLCHAINS_DIR'):
+        return Path(os.environ['CODETOP_TOOLCHAINS_DIR']).resolve()
+    if platforms.system_name() == 'macos':
+        return Path.home() / 'Library/Application Support/CodeTopLocal/toolchains'
+    base = os.environ.get('LOCALAPPDATA')
+    if not base: raise ValueError('无法定位用户语言环境目录 LOCALAPPDATA')
+    return Path(base) / 'CodeTopLocal/toolchains'
+
+
 def verify_bundled_runtime():
     if not getattr(sys, 'frozen', False):
         return

@@ -9,6 +9,24 @@
 
 完整应用运行练习无需安装 Docker。Mac 测试版未经过 Apple 公证；源码、旧 Windows 体验 ZIP 和构建工具的准备方式见下文。
 
+## 多语言源码分支（待发布）
+
+当前源码新增 Python 3.12、C17、C++17、Java 21、Node.js 24 的本机执行；已发布 v1.6.0 安装包仍为旧 Python 版本。源码普通启动入口默认本机模式，显式设置 `CODETOP_RUNNER=docker` 才使用仅 Python 的容器模式。
+
+在代码区选择语言，点击“准备环境”下载固定版本。Windows C/C++ 下载完整 LLVM-MinGW，Java 下载 Temurin JDK，JavaScript 下载 Node.js；Mac C/C++ 使用系统 Command Line Tools 和 SDK，需用户按 [Apple 官方说明](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/)安装后重新检查。应用不会调用系统安装命令、修改 PATH/JAVA_HOME 或自动申请系统权限。
+
+环境目录为 Windows `%LOCALAPPDATA%\CodeTopLocal\toolchains`、Mac `~/Library/Application Support/CodeTopLocal/toolchains`，独立于应用文件和学习数据目录。开发及 CI 可用 `CODETOP_TOOLCHAINS_DIR` 指定独立根；切换学习数据目录和恢复备份不删除工具链。失败归档与 staging 保留，可重试，不会批量清理旧文件。
+
+清单 `packaging/toolchains.json` 固定每个平台的 URL、SHA-256、入口和许可证，运行时不查询 latest。开发者准备所有语言用于验收：
+
+```powershell
+backend/.venv/Scripts/python.exe scripts/prepare_toolchains.py --languages python,c,cpp,java,javascript --root runtime/toolchains-ci --require-ready
+```
+
+Mac 使用 `backend/.venv/bin/python` 运行同一脚本。验收服务需显式设置 `CODETOP_TOOLCHAINS_DIR` 为该根；普通用户直接使用面板默认目录。
+
+升级至 schema 0004 前自动备份旧库；旧 notes 的代码按原语言迁移，包括空白代码和暂不支持执行的语言。0001–0003 备份可恢复并升级，0004 备份包含全部草稿、偏好、共享笔记、历史和运行记录，排除工具链、编译产物和 AI Key。0004 备份需新版应用恢复，不能降级覆盖旧结构。实际验证状态见[多语言验收](multilanguage-acceptance.md)。
+
 ## macOS 构建与使用
 
 免费测试版下载见 [v1.6.0-macos-test.1](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)。M 系列下载 `arm64-unsigned.dmg`，Intel 下载 `x86_64-unsigned.dmg`，打开 DMG 后将 CodeTop.app 拖入 Applications。M 系列在 macOS 15.8.2、Intel 在 macOS 15.7.9 的 GitHub 环境完成构建及应用内自动验证。
@@ -80,7 +98,7 @@ Windows 正式版面向 Windows 10 / 11 x64 的个人本机使用。源码或旧
 | Windows 体验包 | uv、网络；脚本准备 Python 3.12 与后端依赖 | 双击 Start-CodeTop.cmd |
 | 源码 | uv、Node.js/npm、网络；Git 或源码 ZIP | 同上 |
 
-旧体验 ZIP 和普通 Windows 源码入口默认使用 Docker 运行练习，需要启动 Docker Desktop 的 Linux 容器并准备指定镜像。源码开发者也可在启动前设置 `$env:CODETOP_RUNNER='native'`，使用当前 Python 3.12 本机执行器；完整 Windows 安装包和 Mac DMG 已内置本机运行时，无需 Docker。仅浏览题库、记录笔记或编辑代码时也无需 Docker。
+已发布的旧体验 ZIP 默认使用 Docker；当前多语言源码入口默认使用本机运行器。开发者显式设置 `$env:CODETOP_RUNNER='docker'` 时，需要启动 Docker Desktop 的 Linux 容器并准备指定 Python 镜像。完整 Windows 安装包和 Mac DMG 使用内置 Python，无需 Docker。仅浏览题库、记录笔记或编辑代码时也无需 Docker。
 
 先运行 `uv --version`：能显示版本号说明已安装，无需重复安装。提示找不到命令时，可参考 [官方安装文档](https://docs.astral.sh/uv/getting-started/installation/)，WinGet 命令为 `winget install --id=astral-sh.uv -e`。安装完成后重新打开终端，运行 `uv --version` 确认 PATH 生效。Python 3.12 由 uv 按需获取。
 
