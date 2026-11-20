@@ -34,7 +34,7 @@ def test_macos_kernel_cpu_limit_maps_to_time_limit(tmp_path, monkeypatch):
     from app.runner import native_process
     class CpuLimitedProcess:
         memory_exceeded = False
-        def __init__(self, *args):
+        def __init__(self, *args, **kwargs):
             self.stdin, self.stdout, self.stderr = [(tmp_path / name).open('w+b', buffering=0)
                                                   for name in ('stdin', 'stdout', 'stderr')]
         def limit_events(self): return False

@@ -85,7 +85,7 @@ def check(value):
 
 
 class JobProcess:
-    def __init__(self, argv, cwd, env, *, memory_mb=256, max_processes=32):
+    def __init__(self, argv, cwd, env, *, memory_mb=256, max_processes=32, cpu_seconds=3):
         self.job = self.port = self.handle = None
         self.stdin = self.stdout = self.stderr = None
         self.memory_exceeded = False

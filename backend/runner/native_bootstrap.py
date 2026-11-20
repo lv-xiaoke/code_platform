@@ -1,11 +1,12 @@
 """Trusted child bootstrap: apply limits before loading a user's program."""
 import resource
-import runpy
+import math
+import os
 import sys
 
-resource.setrlimit(resource.RLIMIT_CPU, (3, 4))
-resource.setrlimit(resource.RLIMIT_FSIZE, (1024 * 1024, 1024 * 1024))
+cpu = math.ceil(float(sys.argv[2]))
+argv = sys.argv[4:]
+resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu + 1))
+resource.setrlimit(resource.RLIMIT_FSIZE, (256 * 1024 * 1024, 256 * 1024 * 1024))
 resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-script = sys.argv[1]
-sys.argv = [script]
-runpy.run_path(script, run_name='__main__')
+os.execve(argv[0], argv, os.environ)
