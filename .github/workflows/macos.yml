@@ -1,6 +1,8 @@
 name: macOS support and backup exchange
 
 on:
+  push:
+    branches: [codex/macos-support]
   pull_request:
   workflow_dispatch:
 
