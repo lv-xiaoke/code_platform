@@ -38,6 +38,10 @@ def matches(value, data):
 def free_port(preferred):
     for port in (preferred, 0):
         with socket.socket() as sock:
+            if platforms.system_name() == 'macos':
+                # Match Uvicorn's POSIX listener: the old service's TIME_WAIT
+                # sockets must not force restore onto a different browser URL.
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 sock.bind(('127.0.0.1', port))
                 return sock.getsockname()[1]

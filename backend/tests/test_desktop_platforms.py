@@ -60,3 +60,19 @@ def test_failed_browser_launch_has_manual_url(monkeypatch):
     monkeypatch.setattr(webbrowser, 'open', lambda url: False)
     with pytest.raises(RuntimeError, match='http://127.0.0.1:8000/'):
         platforms.open_browser('http://127.0.0.1:8000/')
+
+
+def test_macos_port_probe_allows_rebinding_after_restore(monkeypatch):
+    from app import desktop, platforms
+    import socket
+    options = []
+    class Probe:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def setsockopt(self, *args): options.append(args)
+        def bind(self, address): self.address = address
+        def getsockname(self): return self.address
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'macos')
+    monkeypatch.setattr(desktop.socket, 'socket', Probe)
+    assert desktop.free_port(18061) == 18061
+    assert (socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) in options
