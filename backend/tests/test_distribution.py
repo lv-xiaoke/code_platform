@@ -25,10 +25,23 @@ def test_health_declares_utf8_for_windows_powershell_paths(tmp_path):
 @pytest.mark.skipif(__import__('sys').platform != 'win32', reason='Windows source launcher')
 def test_launcher_rejects_old_server_without_killing_it(tmp_path):
     from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    from app.db import SCHEMA_VERSION
     import threading
+    import venv
+    source=tmp_path/'source'
+    (source/'scripts').mkdir(parents=True)
+    for filename in ('start.ps1','common.ps1'):
+        shutil.copy2(ROOT/'scripts'/filename,source/'scripts'/filename)
+    venv.EnvBuilder(with_pip=False).create(source/'backend/.venv')
+    (source/'backend/app').mkdir()
+    (source/'backend/app/__init__.py').write_text('')
+    (source/'backend/app/db.py').write_text('SCHEMA_VERSION = '+repr(SCHEMA_VERSION),encoding='utf-8')
+    (source/'releases').mkdir()
+    (source/'releases/current.json').write_text('{}')
+    data=tmp_path/'data'
     class Health(BaseHTTPRequestHandler):
         def do_GET(self):
-            body = json.dumps({'app':'codetop-local','root':str(ROOT),'data_dir':str(tmp_path),
+            body = json.dumps({'app':'codetop-local','root':str(source),'data_dir':str(data),
                 'schema_version':'0003','process_id':1}).encode()
             self.send_response(200)
             self.send_header('Content-Type','application/json; charset=utf-8')
@@ -39,8 +52,8 @@ def test_launcher_rejects_old_server_without_killing_it(tmp_path):
     thread=threading.Thread(target=server.serve_forever,daemon=True)
     thread.start()
     try:
-        result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/start.ps1'),
-            '-Port',str(server.server_port),'-DataDir',str(tmp_path),'-NoBrowser'],capture_output=True,timeout=20)
+        result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(source/'scripts/start.ps1'),
+            '-Port',str(server.server_port),'-DataDir',str(data),'-NoBrowser'],capture_output=True,timeout=20)
         assert result.returncode != 0
         assert b'different database schema' in result.stderr
         assert b'Close all CodeTop tabs' in result.stderr
