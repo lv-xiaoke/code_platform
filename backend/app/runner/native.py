@@ -13,7 +13,7 @@ from .comparison import compare_output
 class NativeRunner:
     kind = 'native'
 
-    def __init__(self, artifact_root):
+    def __init__(self, artifact_root, registry=None):
         self.artifact_root = Path(artifact_root).resolve()
         self.artifact_root.mkdir(parents=True, exist_ok=True)
         self.python = native_python()
@@ -24,6 +24,16 @@ class NativeRunner:
         self.active = set()
         self.closed = False
         self.verified = False
+        self.registry = registry
+        self.owns_registry = False
+
+    def toolchains(self):
+        with self.lock:
+            if self.registry is None:
+                from .toolchains.registry import ToolchainRegistry
+                self.registry = ToolchainRegistry()
+                self.owns_registry = True
+            return self.registry
 
     def health(self):
         try:
@@ -59,6 +69,7 @@ class NativeRunner:
             self.closed = True
             for event in self.active:
                 event.set()
+        if self.owns_registry: self.registry.close()
 
     def directory(self, run_id, source):
         if str(UUID(run_id)) != run_id:
@@ -69,26 +80,34 @@ class NativeRunner:
         script.write_text(source, encoding='utf-8')
         return script
 
-    def execute(self, job_id, source_code, cases):
-        from .native_process import execute_process
+    def execute(self, job_id, source_code, cases, language='python', on_phase=None):
+        from .native_process import execute_command
+        from .programs import ProgramPreparer
+        from dataclasses import asdict
         if not 1 <= len(cases) <= 20:
             raise ValueError('每次运行需要 1–20 组测试')
-        health = self.health()
-        if not health['available']:
-            raise RuntimeError(health['error'])
+        if language == 'python':
+            health = self.health()
+            if not health['available']: raise RuntimeError(health['error'])
         event = threading.Event()
         self.register(event)
         try:
-            script = self.directory(job_id, source_code)
+            program = ProgramPreparer(self.artifact_root, self.toolchains()).prepare(
+                job_id, language, source_code, event, on_phase)
+            if on_phase: on_phase({'type': 'phase', 'status': 'running', 'language': language})
             results = []
             for case in cases:
                 if event.is_set():
                     raise RuntimeError('运行已停止')
-                result = execute_process(self.python, script, stdin=case['stdin'], stop_event=event)
+                result = execute_command(program.argv, program.cwd, program.env, budget=program.limits,
+                    stdin=case['stdin'], stop_event=event)
                 if result['status'] == 'executed' and case.get('expected_stdout') is not None:
                     result['status'] = 'passed' if compare_output(result['stdout'], case['expected_stdout'], case.get('comparison', 'tokens')) else 'wrong_answer'
                 results.append({**case, **result})
-            return {'results': results, 'python_version': self.python_version}
+            return {'results': results, 'language': language, 'runtime_version': program.runtime_version,
+                    'toolchain_id': program.toolchain_id, 'compile': program.compile_result,
+                    'limits': asdict(program.limits),
+                    **({'python_version': program.runtime_version} if language == 'python' else {})}
         finally:
             with self.lock:
                 self.active.discard(event)

@@ -171,7 +171,8 @@ def execute_command(argv, cwd, env, *, budget, stdin=None, inputs=None, stop_eve
         process.limit_events()
         output = {name: value.decode('utf-8', errors='ignore') for name, value in buffers.items()}
         if status == 'executed':
-            if process.memory_exceeded or (exit_code and 'MemoryError' in output['stderr']):
+            if process.memory_exceeded or (exit_code and any(message in output['stderr'] for message in
+                    ('MemoryError', 'OutOfMemoryError', 'heap out of memory'))):
                 status = 'memory_limit'
             elif platforms.system_name() == 'macos' and exit_code == -24:  # Darwin SIGXCPU
                 status = 'time_limit'
