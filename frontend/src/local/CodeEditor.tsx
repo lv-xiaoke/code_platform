@@ -19,5 +19,5 @@ export default function CodeEditor({language,value,onChange,readOnly=false,ariaL
   },[language,ariaLabel])
   const dark=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark'
   if(!mounted)return <textarea className="other-code" aria-label={ariaLabel} value={value} readOnly={readOnly} onChange={event=>onChange?.(event.target.value)} style={{height}} spellCheck={false}/>
-  return <div aria-label={ariaLabel}><CodeMirror value={value} onChange={onChange} extensions={extensions} height={height} theme={dark?githubDark:githubLight} editable={!readOnly} readOnly={readOnly} basicSetup={{lineNumbers:true,foldGutter:true,highlightActiveLine:!readOnly}}/></div>
+  return <div aria-label={ariaLabel}><CodeMirror key={language} value={value} onChange={onChange} extensions={extensions} height={height} theme={dark?githubDark:githubLight} editable={!readOnly} readOnly={readOnly} basicSetup={{lineNumbers:true,foldGutter:true,highlightActiveLine:!readOnly}}/></div>
 }

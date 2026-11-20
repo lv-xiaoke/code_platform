@@ -74,6 +74,7 @@ class RunService:
         self.capacity=threading.BoundedSemaphore(8)
         self.lock=threading.RLock()
         self.stops={}
+        self.request_stops={}
         self.cancelled=OrderedDict()
         self.closed=False
         with db.write() as conn:
@@ -113,14 +114,18 @@ class RunService:
                         'status':'queued','error':None,'image_ref':self.runner.image_ref,'created_at':utc_text(self.clock()),'finished_at':None,
                         'language':payload.language}
                 conn.execute(insert(m.runs).values(**values))
-                with self.lock: self.stops[job_id]=threading.Event()
-            self.pool.submit(self._execute,job_id,payload.source_code,cases,payload.language)
+                with self.lock:
+                    stop=threading.Event()
+                    if payload.request_id in self.cancelled or self.closed: stop.set()
+                    self.stops[job_id]=stop
+                    self.request_stops[payload.request_id]=stop
+            self.pool.submit(self._execute,job_id,payload.source_code,cases,payload.language,payload.request_id)
             return run_dict(values)
         except BaseException:
             if reserved: self.capacity.release()
             raise
 
-    def _execute(self,job_id,source_code,cases,language):
+    def _execute(self,job_id,source_code,cases,language,request_id):
         try:
             with self.lock: stop=self.stops[job_id]
             if stop.is_set():
@@ -130,6 +135,8 @@ class RunService:
             if hasattr(self.runner,'toolchains'):
                 result=self.runner.execute(job_id,source_code,cases,language=language,stop_event=stop,
                     on_phase=lambda event:self._phase(job_id,event))
+            elif getattr(self.runner,'kind',None)=='docker':
+                result=self.runner.execute(job_id,source_code,cases,stop_event=stop)
             else: result=self.runner.execute(job_id,source_code,cases)
             with self.db.write() as conn:
                 conn.execute(update(m.runs).where(m.runs.c.id==job_id).values(status='stopped' if any(r.get('status')=='stopped' for r in result.get('results',[])) else 'completed',results_json=json.dumps(result,ensure_ascii=False),
@@ -145,7 +152,9 @@ class RunService:
             with self.db.write() as conn:
                 conn.execute(update(m.runs).where(m.runs.c.id==job_id).values(status='failed',error=str(exc)[:3000],finished_at=utc_text(self.clock())))
         finally:
-            with self.lock: self.stops.pop(job_id,None)
+            with self.lock:
+                self.stops.pop(job_id,None)
+                self.request_stops.pop(request_id,None)
             self.capacity.release()
 
     def _phase(self,job_id,event):
@@ -155,6 +164,8 @@ class RunService:
     def stop_request(self,request_id):
         with self.lock:
             self.cancelled[request_id]=True
+            stop=self.request_stops.get(request_id)
+            if stop: stop.set()
             if len(self.cancelled)>2048: self.cancelled.popitem(last=False)
         with self.db.engine.connect() as conn:
             run_id=conn.execute(select(m.runs.c.id).where(m.runs.c.request_id==request_id)).scalar()

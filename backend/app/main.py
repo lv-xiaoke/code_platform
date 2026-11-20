@@ -175,6 +175,17 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     @app.put('/api/v1/problems/{pid}/code/drafts/{language}')
     def draft_put(pid:str, language:str, payload:DraftWrite): return code_drafts.put_draft(db,pid,language,payload,now())
 
+    @app.get('/api/v1/problems/{pid}/code/draft')
+    def draft_query_get(pid:str, language:str=Query(max_length=50)):
+        return code_drafts.get_draft(db,pid,language)
+
+    @app.put('/api/v1/problems/{pid}/code/draft')
+    def draft_query_put(pid:str, payload:DraftWrite, language:str=Query(max_length=50)):
+        return code_drafts.put_draft(db,pid,language,payload,now())
+
+    @app.get('/api/v1/problems/{pid}/code/languages')
+    def draft_languages(pid:str): return code_drafts.list_languages(db,pid)
+
     @app.get('/api/v1/problems/{pid}/code/preference')
     def preference_get(pid:str): return code_drafts.get_preference(db,pid)
 

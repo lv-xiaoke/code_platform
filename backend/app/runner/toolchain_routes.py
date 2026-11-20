@@ -6,7 +6,7 @@ router = APIRouter(prefix='/api/v1/runner/languages')
 
 
 @router.get('')
-def languages(request: Request):
+def languages(request: Request, refresh: bool=False):
     from .factory import runner_kind
     from .languages import language_info
     if runner_kind() == 'docker':
@@ -15,7 +15,7 @@ def languages(request: Request):
             available=language == 'python' and health['available'],
             state=('ready' if health['available'] else 'unprepared') if language == 'python' else 'unsupported',
             error=health.get('error', '') if language == 'python' else '请切换本机运行模式以执行此语言') for language in LANGUAGES]}
-    return {'languages': [{**language_info(language), **request.app.state.toolchains.capability(language), 'kind': 'native',
+    return {'languages': [{**language_info(language), **request.app.state.toolchains.capability(language, refresh=refresh), 'kind': 'native',
         'memory_enforcement': 'rss-monitor' if __import__('sys').platform == 'darwin' else 'job-object'} for language in LANGUAGES]}
 
 

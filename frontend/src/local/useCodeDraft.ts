@@ -9,8 +9,8 @@ export function useCodeDraft(id:string,initial:Note,stopActive:()=>Promise<boole
     code_text:initial.code_text,revision:initial.draft_revision??0,exists:initial.draft_exists??false,
     created_at:initial.updated_at,updated_at:initial.updated_at},{
     stopActive:()=>stop.current(),
-    read:language=>api<CodeDraft>(`/problems/${id}/code/drafts/${encodeURIComponent(language)}`),
-    write:(language,code_text,revision)=>api<CodeDraft>(`/problems/${id}/code/drafts/${encodeURIComponent(language)}`,{method:'PUT',body:JSON.stringify({revision,code_text})}),
+    read:language=>api<CodeDraft>(`/problems/${id}/code/draft?language=${encodeURIComponent(language)}`),
+    write:(language,code_text,revision)=>api<CodeDraft>(`/problems/${id}/code/draft?language=${encodeURIComponent(language)}`,{method:'PUT',body:JSON.stringify({revision,code_text})}),
     select:async language=>{
       const pref=await api<{revision:number}>(`/problems/${id}/code/preference`)
       return api(`/problems/${id}/code/preference`,{method:'PUT',body:JSON.stringify({language,revision:pref.revision})})

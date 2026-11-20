@@ -1,5 +1,4 @@
 """Independent code revisions; archive and replace a draft in one transaction."""
-import re
 
 from fastapi import HTTPException
 from sqlalchemy import select, insert, update
@@ -9,7 +8,9 @@ from .learning import require_problem, utc_text
 
 
 def check_language(language):
-    if not re.fullmatch(r'[a-z0-9_-]{1,32}', language):
+    # Legacy notes accepted a free language string (including empty), up to 50
+    # characters. It is a bound SQL key, never a filename or executable selector.
+    if not isinstance(language, str) or len(language) > 50:
         raise HTTPException(422, '语言标识无效')
 
 
@@ -71,6 +72,14 @@ def get_preference(db, pid):
     with db.engine.connect() as conn:
         require_problem(conn, pid)
         return preference_in(conn, pid)
+
+
+def list_languages(db, pid):
+    with db.engine.connect() as conn:
+        require_problem(conn, pid)
+        query = select(m.code_drafts.c.language).where(m.code_drafts.c.problem_id == pid).union(
+            select(m.code_history.c.language).where(m.code_history.c.problem_id == pid))
+        return sorted(conn.execute(query).scalars())
 
 
 def put_preference(db, pid, payload, now):

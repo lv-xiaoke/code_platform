@@ -52,4 +52,21 @@ def test_rewrite_only_touches_target_language_and_is_atomic(loaded):
 def test_unknown_problem_and_path_language_rejected(loaded):
     c, _, _, pid = loaded
     assert c.get('/api/v1/problems/missing/code/drafts/python').status_code == 404
-    assert c.put(f'/api/v1/problems/{pid}/code/drafts/..bad', json={'revision': 0, 'code_text': 'x'}).status_code == 422
+    assert c.put(f'/api/v1/problems/{pid}/code/drafts/'+('x'*51), json={'revision': 0, 'code_text': 'x'}).status_code == 422
+
+
+def test_legacy_language_names_remain_editable_and_discoverable(loaded):
+    from urllib.parse import quote
+    c,_,_,pid=loaded
+    base=f'/api/v1/problems/{pid}/code'
+    for language in ('Go','C++','kotlin','a/b',''):
+        url=base+'/draft?language='+quote(language,safe='')
+        response=c.put(url,json={'revision':0,'code_text':'original '+language})
+        assert response.status_code==200,response.text
+        assert c.get(url).json()['code_text']=='original '+language
+        pref=c.get(base+'/preference').json()
+        assert c.put(base+'/preference',json={'revision':pref['revision'],'language':language}).status_code==200
+    assert set(c.get(base+'/languages').json())>={'Go','C++','kotlin','a/b',''}
+    pref=c.get(base+'/preference').json()
+    assert c.put(base+'/preference',json={'revision':pref['revision'],'language':'python'}).status_code==200
+    assert 'kotlin' in c.get(base+'/languages').json()

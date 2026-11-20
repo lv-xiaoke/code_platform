@@ -15,7 +15,7 @@ class NoteWrite(StrictModel):
 
 class CodeRewrite(StrictModel):
     revision: int = Field(ge=0)
-    language: str = Field(min_length=1, max_length=32)
+    language: str = Field(max_length=50)
     history_id: int | None = Field(default=None, gt=0)
 
 
@@ -31,7 +31,7 @@ class NoteBodyWrite(StrictModel):
 
 class LanguagePreferenceWrite(StrictModel):
     revision: int = Field(ge=0)
-    language: str = Field(min_length=1, max_length=32)
+    language: str = Field(max_length=50)
 
 
 class StateWrite(StrictModel):

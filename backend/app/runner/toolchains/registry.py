@@ -117,11 +117,21 @@ class ToolchainRegistry:
                 raise ValueError('需要 Node.js 24 工具链')
         return ResolvedToolchain(item['id'], item['version'], entries)
 
-    def capability(self, language):
+    def capability(self, language, *, refresh=False):
         if language not in LANGUAGES: return dict(language=language, available=False, state='unsupported', error='可编辑，暂不支持运行')
         key = self.key(language)
         with self.lock:
             state = self.states.get(key)
+            if state and state['state'] == 'failed' and (self.root / ('ready-' + key + '.json')).is_file():
+                # A second application may have published the shared environment
+                # after this instance lost the preparation lock. Probe that receipt.
+                self.states.pop(key, None)
+                self.ready.pop(key, None)
+                state = None
+            if refresh and (not state or state['state'] == 'ready'):
+                self.ready.pop(key, None)
+                self.states.pop(key, None)
+                state = None
             if state: return {**state, 'language': language}
             try:
                 resolved = self.ready.get(key)

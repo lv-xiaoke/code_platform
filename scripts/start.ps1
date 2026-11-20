@@ -19,6 +19,12 @@ try { $Task = $Listener.ConnectAsync('127.0.0.1',$Port); $Occupied = $Task.Wait(
 if ($Occupied) {
     try { $Health = Invoke-RestMethod "$Url/api/v1/health" -TimeoutSec 3 } catch { throw "Port $Port is occupied by another program." }
     if ($Health.app -ne 'codetop-local' -or $Health.root -ne $AppRoot -or $Health.data_dir -ne $DataDir) { throw "Port $Port belongs to a different application or data directory." }
+    Push-Location -LiteralPath $BackendDir
+    try { $ExpectedSchema = (& $PythonExe -c 'from app.db import SCHEMA_VERSION; print(SCHEMA_VERSION)').Trim() }
+    finally { Pop-Location }
+    if ($Health.schema_version -ne $ExpectedSchema) {
+        throw 'Existing CodeTop uses a different database schema. Close all CodeTop tabs and stop the old service before starting this build.'
+    }
     Write-Host "CodeTop is already running: $Url"
     if (-not $NoBrowser) { Start-Process $BrowserUrl }
     return

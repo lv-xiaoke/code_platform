@@ -61,7 +61,7 @@ test('failed draft save prevents archiving and keeps the unsaved code available 
   assert.equal(requests.length,1)
   const retry=code.flush()
   await until(()=>requests.length===2)
-  assert.equal(requests[1].url,'/api/v1/problems/p/code/drafts/python')
+  assert.equal(requests[1].url,'/api/v1/problems/p/code/draft?language=python')
   assert.equal(requests[1].body.code_text,'do not lose this')
   requests[1].reply({problem_id:'p',language:'python',...requests[1].body,revision:2,exists:true,created_at:'now',updated_at:'now'})
   assert.equal(await retry,true)

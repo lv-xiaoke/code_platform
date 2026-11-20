@@ -55,7 +55,8 @@ class DockerRunner:
             return subprocess.run([self.docker,verb,*(['--force'] if verb=='rm' else []),name],capture_output=True,timeout=8,**FLAGS)
         except (OSError,subprocess.TimeoutExpired): return None
 
-    def execute(self,job_id,source_code,cases):
+    def execute(self,job_id,source_code,cases,stop_event=None):
+        stop_event=stop_event or threading.Event()
         if not 1<=len(cases)<=20: raise ValueError('每次运行需要 1–20 组测试')
         job_dir=self.artifact_root/job_id
         command=self.command(job_id,job_dir)
@@ -70,6 +71,7 @@ class DockerRunner:
         transport_limit=len(cases)*(RUNTIME['output_limit_bytes']*6+4096)+65536
         exceeded=threading.Event()
         process=None
+        started=time.monotonic()
         try:
             process=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.DEVNULL,**FLAGS)
             def capture(stream,buffer):
@@ -87,6 +89,14 @@ class DockerRunner:
             for thread in threads: thread.start()
             deadline=time.monotonic()+len(cases)*2.5+15
             while process.poll() is None:
+                if stop_event.is_set():
+                    self._control('kill',name)
+                    if process.poll() is None: process.kill()
+                    process.wait(timeout=5)
+                    for thread in threads: thread.join(timeout=2)
+                    return {'language':'python','image_ref':self.image_ref,'results':[{**cases[0],
+                        'status':'stopped','stdout':'','stderr':'','exit_code':None,
+                        'duration_ms':round((time.monotonic()-started)*1000,2)}]}
                 if exceeded.is_set() or time.monotonic()>deadline:
                     self._control('kill',name)
                     process.kill();process.wait(timeout=5)

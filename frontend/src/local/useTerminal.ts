@@ -23,7 +23,7 @@ export function useTerminal(problemId:string){
     const previous=startBody.current
     const body=prepareTerminalStart(previous,source,language)
     startBody.current=body;requestKey.current=body.request_id
-    setStarting(true);setError('');pendingInput.current=null
+    setId(null);setStarting(true);setError('');pendingInput.current=null
     const promise=(async()=>{
       try{
         for(const key of ownedRequests.current){

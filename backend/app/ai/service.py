@@ -109,10 +109,15 @@ class AiService:
             run=run_dict(row,True)
             context['run']={key:run.get(key) for key in ('id','status','source_code','cases','results','error',
                 'language','runtime_version','toolchain_id','compile','limits')}
+            from .context_paths import mask_diagnostics
+            for key in ('compile','error','results'):
+                context['run'][key]=mask_diagnostics(context['run'][key],self.db.data_dir)
         if payload.include_history:
             with self.db.engine.connect() as conn:
                 rows=conn.execute(select(m.runs).where(m.runs.c.problem_id==pid).order_by(m.runs.c.created_at.desc()).limit(3)).mappings().all()
             context['recent_runs']=[{k:row[k] for k in ('id','status','error','language','runtime_version')} for row in rows]
+            from .context_paths import mask_diagnostics
+            context['recent_runs']=mask_diagnostics(context['recent_runs'],self.db.data_dir)
         if len(json.dumps(context,ensure_ascii=False))>160000: raise HTTPException(422,'附带内容过长，请减少代码或运行输出后重试')
         return context
 

@@ -10,6 +10,7 @@ export default function CodePractice(props:Props){
   const qc=useQueryClient()
   const [selected,setSelected]=useState<number|null>(null),[message,setMessage]=useState('')
   const [onlyCurrent,setOnlyCurrent]=useState(false)
+  const languages=useQuery({queryKey:['code-languages',props.problemId],queryFn:()=>api<string[]>(`/problems/${props.problemId}/code/languages`),staleTime:0})
   const versions=useQuery({queryKey:['code-history',props.problemId],queryFn:()=>api<CodeVersion[]>(`/problems/${props.problemId}/code/history`),enabled:props.view==='history',staleTime:0})
   const filtered=versions.data?.filter(version=>!onlyCurrent||version.language===props.language)
   const current=filtered?.find(v=>v.id===selected)??filtered?.[0]
@@ -33,7 +34,7 @@ export default function CodePractice(props:Props){
         <button aria-pressed={props.view==='history'} onClick={()=>{props.onViewChange('history');setMessage('')}}><History size={13}/>历史代码</button>
       </div>
       <div><button disabled={disabled} title="将当前非空代码保存到历史，再开始空白练习" onClick={()=>void replace()}><RotateCcw size={13}/>{props.changing?'正在保存…':'重新编写'}</button>
-        {props.view==='current'&&<select disabled={props.changing} aria-label="代码语言" value={props.language} onChange={e=>props.onLanguageChange(e.target.value)}>{Array.from(new Set(['python','c','cpp','java','javascript','typescript','go','rust','sql','text',props.language])).map(v=><option key={v}>{v}</option>)}</select>}
+        {props.view==='current'&&<select disabled={props.changing} aria-label="代码语言" value={props.language} onChange={e=>props.onLanguageChange(e.target.value)}>{Array.from(new Set(['python','c','cpp','java','javascript','typescript','go','rust','sql','text',...(languages.data??[]),props.language])).map(v=><option key={v} value={v}>{v||'（旧草稿未标注语言）'}</option>)}</select>}
       </div>
     </div>
     {message&&<p className="code-history-message muted small" role="status">{message}</p>}

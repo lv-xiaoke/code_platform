@@ -22,6 +22,33 @@ def test_health_declares_utf8_for_windows_powershell_paths(tmp_path):
         assert response.json()['root'] == str(root.resolve())
 
 
+@pytest.mark.skipif(__import__('sys').platform != 'win32', reason='Windows source launcher')
+def test_launcher_rejects_old_server_without_killing_it(tmp_path):
+    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    import threading
+    class Health(BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = json.dumps({'app':'codetop-local','root':str(ROOT),'data_dir':str(tmp_path),
+                'schema_version':'0003','process_id':1}).encode()
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(body)
+        def log_message(self,*args): pass
+    server=ThreadingHTTPServer(('127.0.0.1',0),Health)
+    thread=threading.Thread(target=server.serve_forever,daemon=True)
+    thread.start()
+    try:
+        result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/start.ps1'),
+            '-Port',str(server.server_port),'-DataDir',str(tmp_path),'-NoBrowser'],capture_output=True,timeout=20)
+        assert result.returncode != 0
+        assert b'different database schema' in result.stderr
+        assert b'Close all CodeTop tabs' in result.stderr
+        assert thread.is_alive()
+    finally:
+        server.shutdown();server.server_close();thread.join(3)
+
+
 def test_seed_is_not_ignored_by_git():
     if not (ROOT / '.git').exists() or not shutil.which('git'):
         pytest.skip('Git checkout required; source ZIPs have no ignore metadata')

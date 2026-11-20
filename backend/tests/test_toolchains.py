@@ -140,3 +140,50 @@ def test_publication_retries_transient_windows_directory_lock(tmp_path, monkeypa
     monkeypatch.setattr(Path, 'rename', locked)
     publish_directory(source, target, threading.Event())
     assert (target / 'runtime').read_bytes() == b'verified'
+
+
+def test_explicit_recheck_detects_removed_runtime_without_downloading(tmp_path, monkeypatch):
+    from app.runner.toolchains import registry as module, archive
+    from app import platforms
+    monkeypatch.setattr(platforms,'system_name',lambda:'windows')
+    monkeypatch.setattr(platforms,'architecture',lambda:'x86_64')
+    monkeypatch.setattr(module,'probe_output',lambda argv,env=None:'v24.22.3')
+    monkeypatch.setattr(archive,'download_archive',lambda *args:pytest.fail('a recheck must not download'))
+    registry=module.ToolchainRegistry(tmp_path,'packaging/toolchains.json')
+    item=registry.artifact('javascript')
+    directory=tmp_path/'installed'
+    binary=directory/item['root']/item['executables']['node']
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b'controlled runtime entry')
+    pointer=tmp_path/('ready-'+item['id']+'.json')
+    pointer.write_text(json.dumps(dict(directory=directory.name,sha256=item['sha256'])))
+    try:
+        assert registry.capability('javascript')['available']
+        binary.unlink()  # one explicit file owned by this test
+        assert registry.capability('javascript',refresh=True)['state']=='unprepared'
+        assert pointer.is_file()
+    finally:
+        registry.close()
+
+
+def test_peer_install_recovers_failed_instance_without_network(tmp_path, monkeypatch):
+    from app.runner.toolchains import registry as module,archive
+    from app import platforms
+    monkeypatch.setattr(platforms,'system_name',lambda:'windows')
+    monkeypatch.setattr(platforms,'architecture',lambda:'x86_64')
+    monkeypatch.setattr(module,'probe_output',lambda argv,env=None:'v24.22.3')
+    monkeypatch.setattr(archive,'download_archive',lambda *args:pytest.fail('installed peer environment must work offline'))
+    registry=module.ToolchainRegistry(tmp_path,'packaging/toolchains.json')
+    item=registry.artifact('javascript')
+    registry.states[item['id']]=dict(state='failed',available=False,error='another process owns installation lock')
+    directory=tmp_path/'peer-installed'
+    binary=directory/item['root']/item['executables']['node']
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b'controlled executable')
+    (tmp_path/('ready-'+item['id']+'.json')).write_text(json.dumps(dict(directory=directory.name,sha256=item['sha256'])))
+    try:
+        assert registry.capability('javascript',refresh=True)['available']
+        assert registry.resolve('javascript').id==item['id']
+        assert registry.prepare('javascript')['available']
+    finally:
+        registry.close()
