@@ -48,10 +48,11 @@ class RunWrite(StrictModel):
 class TerminalStart(StrictModel):
     request_id: str = Field(min_length=1,max_length=128)
     source_code: str = Field(min_length=1,max_length=200000)
+    language: Literal['python','c','cpp','java','javascript']='python'
 
     @model_validator(mode='after')
     def not_blank(self):
-        if not self.source_code.strip(): raise ValueError('请先编写 Python 代码')
+        if not self.source_code.strip(): raise ValueError('请先编写代码')
         return self
 
 

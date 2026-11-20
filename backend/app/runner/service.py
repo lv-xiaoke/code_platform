@@ -139,7 +139,8 @@ class RunService:
             with self.db.write() as conn:
                 conn.execute(update(m.runs).where(m.runs.c.id==job_id).values(status=exc.status,
                     compile_json=json.dumps(exc.diagnostics,ensure_ascii=False),error=str(exc)[:3000],
-                    runtime_version=exc.metadata.get('runtime_version'),toolchain_id=exc.metadata.get('toolchain_id'),finished_at=utc_text(self.clock())))
+                    runtime_version=exc.metadata.get('runtime_version'),toolchain_id=exc.metadata.get('toolchain_id'),
+                    limits_json=json.dumps(exc.metadata.get('limits')),finished_at=utc_text(self.clock())))
         except Exception as exc:
             with self.db.write() as conn:
                 conn.execute(update(m.runs).where(m.runs.c.id==job_id).values(status='failed',error=str(exc)[:3000],finished_at=utc_text(self.clock())))

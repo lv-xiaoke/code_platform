@@ -13,9 +13,11 @@ from .. import models as m
 from ..learning import require_problem, utc_text
 from .factory import create_runner
 from .consent import require_native_consent
+from .execution import require_environment
+from .programs import PreparationError
 
 LIMIT=65536
-ACTIVE={'starting','running','stopping'}
+ACTIVE={'starting','preparing','compiling','running','stopping'}
 
 
 def digest(value):
@@ -23,7 +25,7 @@ def digest(value):
 
 
 class TerminalSession:
-    def __init__(self,run_id,pid,source):
+    def __init__(self,run_id,pid,source,language='python'):
         self.id,self.problem_id,self.source_code=run_id,pid,source
         self.lock=threading.RLock()
         self.inputs=queue.Queue()
@@ -32,6 +34,8 @@ class TerminalSession:
         self.status='starting'
         self.stdout=self.stderr=self.stdin=self.transcript=''
         self.python_version=None
+        self.language=language
+        self.metadata={}
         self.input_closed=False
         self.accepting=True
         self.output_bytes=0
@@ -42,7 +46,11 @@ class TerminalSession:
         with self.lock:
             if event['type']=='ready':
                 self.python_version=event.get('python_version')
+                self.metadata.update({k:v for k,v in event.items() if k!='type'})
                 if not self.stop_event.is_set(): self.status='running'
+            elif event['type']=='phase':
+                self.metadata.update({k:v for k,v in event.items() if k not in ('type','status')})
+                if not self.stop_event.is_set(): self.status=event['status']
             elif event['type'] in ('stdout','stderr'):
                 text=event['text']
                 raw=text.encode('utf-8')
@@ -54,7 +62,7 @@ class TerminalSession:
 
     def snapshot(self):
         with self.lock:
-            return {'id':self.id,'problem_id':self.problem_id,'status':self.status,
+            return {**self.metadata,'id':self.id,'problem_id':self.problem_id,'status':self.status,'language':self.language,
                     'stdout':self.stdout,'stderr':self.stderr,'stdin':self.stdin,'transcript':self.transcript,
                     'input_closed':self.input_closed or not self.accepting,'python_version':self.python_version,
                     'exit_code':self.result.get('exit_code'),'error':self.result.get('error')}
@@ -80,9 +88,10 @@ class TerminalSession:
 
 
 class TerminalService:
-    def __init__(self,db,clock):
+    def __init__(self,db,clock,registry=None):
         self.db,self.clock=db,clock
         self.runner=create_runner(db.data_dir/'runs', interactive=True)
+        if registry is not None and getattr(self.runner,'kind',None)=='native': self.runner.registry=registry
         self.lock=threading.RLock()
         self.sessions={}
         self.cancelled=OrderedDict()
@@ -90,7 +99,7 @@ class TerminalService:
 
     def start(self,pid,payload):
         require_native_consent(self.db.data_dir, self.runner)
-        signature=digest({'mode':'interactive','problem_id':pid,'source_code':payload.source_code})
+        signature=digest({'mode':'interactive','problem_id':pid,'source_code':payload.source_code,'language':payload.language})
         with self.lock:
             if self.closed: raise HTTPException(503,'服务正在停止')
             if payload.request_id in self.cancelled: raise HTTPException(409,'这次运行已取消，请重新点击运行')
@@ -101,16 +110,17 @@ class TerminalService:
                     if old['request_hash']!=signature: raise HTTPException(409,'此请求编号已用于不同的程序')
                     old_id=old['id']
                 else:
+                    require_environment(self.runner,payload.language)
                     if len(self.sessions)>=2: raise HTTPException(429,'最多同时运行两个交互终端，请先停止已有程序')
                     old_id=None
                     run_id=str(uuid4())
                     case={'id':'terminal:'+run_id,'name':'交互终端','stdin':'','expected_stdout':None,'comparison':'tokens'}
                     conn.execute(insert(m.runs).values(id=run_id,problem_id=pid,request_id=payload.request_id,
                         request_hash=signature,source_code=payload.source_code,tests_json=json.dumps([case]),
-                        results_json=None,status='running',error=None,image_ref=self.runner.image_ref,
+                        results_json=None,status='preparing',error=None,image_ref=self.runner.image_ref,language=payload.language,
                         created_at=utc_text(self.clock()),finished_at=None))
             if old_id: return self.get(old_id)
-            session=TerminalSession(run_id,pid,payload.source_code)
+            session=TerminalSession(run_id,pid,payload.source_code,language=payload.language)
             self.sessions[run_id]=session
             threading.Thread(target=self._execute,args=(session,),daemon=True,name='terminal-'+run_id).start()
             return session.snapshot()
@@ -118,21 +128,27 @@ class TerminalService:
     def _execute(self,session):
         try:
             result=self.runner.execute(session)
+        except PreparationError as exc:
+            result={'status':exc.status,'error':str(exc)[:3000],'compile':exc.diagnostics,**exc.metadata,'exit_code':None,'duration_ms':0}
         except Exception as exc:
             result={'status':'failed','error':str(exc)[:3000],'exit_code':None,'duration_ms':0}
         try:
             with session.lock:
                 session.accepting=False
                 session.result=result
+                session.metadata.update({key:result[key] for key in ('language','runtime_version','toolchain_id','compile','limits') if key in result})
                 session.status=result['status']
                 case={'id':'terminal:'+session.id,'name':'交互终端','stdin':session.stdin,'expected_stdout':None,'comparison':'tokens'}
                 record={**case,'stdout':session.stdout,'stderr':session.stderr,**result}
-                output={'results':[record],'python_version':session.python_version,
+                output={'results':[record],'python_version':session.python_version,**session.metadata,
                         'terminal':{**session.snapshot(),'input_requests':session.requests}}
             with self.db.write() as conn:
                 conn.execute(update(m.runs).where(m.runs.c.id==session.id).values(
                     tests_json=json.dumps([case],ensure_ascii=False),results_json=json.dumps(output,ensure_ascii=False),
-                    status='failed' if result['status']=='failed' else 'completed',error=result.get('error'),finished_at=utc_text(self.clock())))
+                    status=result['status'] if result['status'] in ('failed','compile_error','compile_time_limit','stopped') else 'completed',
+                    runtime_version=session.metadata.get('runtime_version') or session.python_version,toolchain_id=session.metadata.get('toolchain_id'),
+                    compile_json=json.dumps(session.metadata.get('compile'),ensure_ascii=False),limits_json=json.dumps(session.metadata.get('limits')),
+                    error=result.get('error'),finished_at=utc_text(self.clock())))
         finally:
             session.finished.set()
             with self.lock: self.sessions.pop(session.id,None)
@@ -151,7 +167,7 @@ class TerminalService:
         payload=json.loads(row['results_json']) if row['results_json'] else {}
         result=payload.get('terminal')
         if result: return {k:v for k,v in result.items() if k!='input_requests'}
-        return {'id':run_id,'problem_id':row['problem_id'],'status':'interrupted','stdout':'','stderr':'','stdin':'',
+        return {'id':run_id,'problem_id':row['problem_id'],'status':'interrupted','language':row['language'],'stdout':'','stderr':'','stdin':'',
                 'transcript':'','input_closed':True,'python_version':None,'exit_code':None,'error':row['error'] or '服务已重启，请重新运行'}
 
     def send(self,run_id,payload):

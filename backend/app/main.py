@@ -44,7 +44,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             from .runner.service import RunService
             app.state.run_service=RunService(db,now,registry=app.state.toolchains)
             from .runner.terminal import TerminalService
-            app.state.terminal_service=TerminalService(db,now)
+            app.state.terminal_service=TerminalService(db,now,registry=app.state.toolchains)
             from .ai.service import AiService
             app.state.ai_service=AiService(db,now)
             if bootstrap:
