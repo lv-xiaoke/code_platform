@@ -39,6 +39,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
         if lock: lock.__enter__()
         try:
             db.migrate()
+            from .runner.toolchains.registry import ToolchainRegistry
+            app.state.toolchains = ToolchainRegistry()
             from .runner.service import RunService
             app.state.run_service=RunService(db,now)
             from .runner.terminal import TerminalService
@@ -61,6 +63,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             if hasattr(app.state,'ai_service'): app.state.ai_service.close()
             if hasattr(app.state,'terminal_service'): app.state.terminal_service.close()
             if hasattr(app.state,'run_service'): app.state.run_service.close()
+            if hasattr(app.state,'toolchains'): app.state.toolchains.close()
             db.engine.dispose()
             if lock: lock.__exit__()
 
@@ -70,6 +73,8 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
     app.state.browser_tabs = None
     from .runner.routes import router as runner_router
     app.include_router(runner_router)
+    from .runner.toolchain_routes import router as toolchain_router
+    app.include_router(toolchain_router)
     from .ai.routes import router as ai_router
     app.include_router(ai_router)
     from .desktop_restore import router as desktop_router
