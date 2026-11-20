@@ -42,7 +42,7 @@ def create_app(root=None, data_dir=None, clock=None, bootstrap=True):
             from .runner.toolchains.registry import ToolchainRegistry
             app.state.toolchains = ToolchainRegistry()
             from .runner.service import RunService
-            app.state.run_service=RunService(db,now)
+            app.state.run_service=RunService(db,now,registry=app.state.toolchains)
             from .runner.terminal import TerminalService
             app.state.terminal_service=TerminalService(db,now)
             from .ai.service import AiService

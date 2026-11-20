@@ -107,11 +107,12 @@ class AiService:
                 row=conn.execute(select(m.runs).where(m.runs.c.id==payload.run_id,m.runs.c.problem_id==pid)).mappings().first()
             if not row: raise HTTPException(404,'本题运行记录不存在')
             run=run_dict(row,True)
-            context['run']={key:run.get(key) for key in ('id','status','source_code','cases','results','error')}
+            context['run']={key:run.get(key) for key in ('id','status','source_code','cases','results','error',
+                'language','runtime_version','toolchain_id','compile','limits')}
         if payload.include_history:
             with self.db.engine.connect() as conn:
                 rows=conn.execute(select(m.runs).where(m.runs.c.problem_id==pid).order_by(m.runs.c.created_at.desc()).limit(3)).mappings().all()
-            context['recent_runs']=[{k:row[k] for k in ('id','status','error')} for row in rows]
+            context['recent_runs']=[{k:row[k] for k in ('id','status','error','language','runtime_version')} for row in rows]
         if len(json.dumps(context,ensure_ascii=False))>160000: raise HTTPException(422,'附带内容过长，请减少代码或运行输出后重试')
         return context
 

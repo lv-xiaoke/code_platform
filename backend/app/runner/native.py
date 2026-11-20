@@ -80,16 +80,17 @@ class NativeRunner:
         script.write_text(source, encoding='utf-8')
         return script
 
-    def execute(self, job_id, source_code, cases, language='python', on_phase=None):
+    def execute(self, job_id, source_code, cases, language='python', on_phase=None, stop_event=None):
         from .native_process import execute_command
         from .programs import ProgramPreparer
+        from .languages import COMPILE_BUDGET
         from dataclasses import asdict
         if not 1 <= len(cases) <= 20:
             raise ValueError('每次运行需要 1–20 组测试')
         if language == 'python':
             health = self.health()
             if not health['available']: raise RuntimeError(health['error'])
-        event = threading.Event()
+        event = stop_event or threading.Event()
         self.register(event)
         try:
             program = ProgramPreparer(self.artifact_root, self.toolchains()).prepare(
@@ -97,16 +98,15 @@ class NativeRunner:
             if on_phase: on_phase({'type': 'phase', 'status': 'running', 'language': language})
             results = []
             for case in cases:
-                if event.is_set():
-                    raise RuntimeError('运行已停止')
                 result = execute_command(program.argv, program.cwd, program.env, budget=program.limits,
                     stdin=case['stdin'], stop_event=event)
                 if result['status'] == 'executed' and case.get('expected_stdout') is not None:
                     result['status'] = 'passed' if compare_output(result['stdout'], case['expected_stdout'], case.get('comparison', 'tokens')) else 'wrong_answer'
                 results.append({**case, **result})
+                if result['status'] == 'stopped': break
             return {'results': results, 'language': language, 'runtime_version': program.runtime_version,
                     'toolchain_id': program.toolchain_id, 'compile': program.compile_result,
-                    'limits': asdict(program.limits),
+                    'limits': {**asdict(program.limits), 'compile': asdict(COMPILE_BUDGET) if program.compile_result is not None else None},
                     **({'python_version': program.runtime_version} if language == 'python' else {})}
         finally:
             with self.lock:

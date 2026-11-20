@@ -1,5 +1,5 @@
 """Prepare one isolated program once; samples only execute its final argv."""
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 import os
 from uuid import UUID
@@ -41,7 +41,8 @@ class ProgramPreparer:
         directory.mkdir(parents=True, exist_ok=False)
         (directory / spec.filename).write_text(source, encoding='utf-8')
         env = command_env(entries)
-        metadata = dict(language=language, runtime_version=toolchain.version, toolchain_id=toolchain.id)
+        metadata = dict(language=language, runtime_version=toolchain.version, toolchain_id=toolchain.id,
+            limits={**asdict(spec.run_budget), 'compile': asdict(COMPILE_BUDGET) if spec.compiled else None})
         if on_phase: on_phase({'type': 'phase', 'status': 'preparing', **metadata})
         if stop_event.is_set(): raise PreparationError('stopped', {'stderr': '运行已停止'}, metadata)
         output = directory / ('main.exe' if os.name == 'nt' else 'main')
