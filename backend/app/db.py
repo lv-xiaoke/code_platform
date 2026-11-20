@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, event
 from .paths import application_root, default_data_dir
 
 ROOT = application_root()
-SCHEMA_VERSION = '0003'
+SCHEMA_VERSION = '0004'
 
 
 class Database:

@@ -61,6 +61,15 @@ code_history = Table('code_history', metadata,
     Column('code_text', Text, nullable=False), Column('language', String, nullable=False),
     Column('created_at', String, nullable=False))
 Index('ix_code_history_problem', code_history.c.problem_id, code_history.c.id)
+code_drafts = Table('code_drafts', metadata,
+    Column('problem_id', String, ForeignKey('problems.id'), primary_key=True),
+    Column('language', String, primary_key=True), Column('code_text', Text, nullable=False),
+    Column('revision', Integer, nullable=False), Column('created_at', String, nullable=False),
+    Column('updated_at', String, nullable=False))
+problem_preferences = Table('problem_preferences', metadata,
+    Column('problem_id', String, ForeignKey('problems.id'), primary_key=True),
+    Column('language', String, nullable=False), Column('revision', Integer, nullable=False),
+    Column('updated_at', String, nullable=False))
 settings = Table('settings', metadata, Column('key', String, primary_key=True), Column('value_json', Text, nullable=False))
 previews = Table('import_previews', metadata,
     Column('id', String, primary_key=True), Column('source_name', String, nullable=False), Column('sha256', String, nullable=False),
@@ -75,5 +84,8 @@ runs = Table('code_runs', metadata,
     Column('request_id', String, nullable=False, unique=True), Column('request_hash', String, nullable=False),
     Column('source_code', Text, nullable=False), Column('tests_json', Text, nullable=False),
     Column('results_json', Text), Column('status', String, nullable=False), Column('error', Text),
-    Column('image_ref', String), Column('created_at', String, nullable=False), Column('finished_at', String))
+    Column('image_ref', String), Column('created_at', String, nullable=False), Column('finished_at', String),
+    Column('language', String, nullable=False, server_default='python'),
+    Column('runtime_version', Text), Column('toolchain_id', Text),
+    Column('compile_json', Text), Column('limits_json', Text))
 Index('ix_problem_runs', runs.c.problem_id, runs.c.created_at)
