@@ -59,3 +59,5 @@
 .terminal-input-actions button{font-size:11px;padding:7px 10px}
 .terminal-input-actions>span{font-size:10px;line-height:1.8}
 .interactive-terminal textarea:disabled{opacity:.6}
+
+.language-environment{border:1px solid var(--border,#d8dee4);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:13px}.language-environment summary{cursor:pointer;font-weight:600}.language-environment p{overflow-wrap:anywhere}.language-environment a{margin-left:8px}.compile-diagnostics{margin:10px 0}.compile-diagnostics pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;padding:10px;background:var(--bg-secondary,#f5f7fa)}.code-history-filter{display:flex;align-items:center;gap:6px;margin:8px 0;font-size:13px}

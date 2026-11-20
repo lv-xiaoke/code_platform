@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify'
 import {ExternalLink,Star,X,BookOpen,Download,Check,Pause,Play} from 'lucide-react'
 import {api,type Detail,type StudyState,dateLabel,downloadText,safeLink} from './api'
 import {useNote} from './useNote'
+import {useCodeDraft} from './useCodeDraft'
 import {EditorBoundary} from './EditorBoundary'
 
 const NoteEditor = lazy(()=>import('../components/NoteEditorDialog').then(m=>({default:m.NoteEditorDialog})))
@@ -24,6 +25,8 @@ function DetailContent({detail,onClose}:{detail:Detail;onClose:()=>void}){
   const [attempts,setAttempts]=useState(detail.attempts)
   const acmAnchor=useRef<HTMLDivElement>(null),acmGuard=useRef<(()=>Promise<boolean>)|null>(null)
   const registerAcmGuard=useCallback((guard:(()=>Promise<boolean>)|null)=>{acmGuard.current=guard},[])
+  const stopCode=useCallback(async()=>acmGuard.current?await acmGuard.current():true,[])
+  const code=useCodeDraft(detail.id,detail.note,stopCode)
   const link=safeLink(detail.url)
   const invalidate=()=>{for(const key of ['problems','due','activity','detail'])void qc.invalidateQueries({queryKey:[key]})}
   async function changeState(patch:Partial<StudyState>){
@@ -43,11 +46,11 @@ function DetailContent({detail,onClose}:{detail:Detail;onClose:()=>void}){
   }
   async function close(){
     if(acmGuard.current&&!await acmGuard.current())return
-    if(await note.flush()){invalidate();onClose()}
+    if(await code.flush()&&await note.flush()){invalidate();onClose()}
   }
   async function recover(){
-    downloadText(`未保存草稿-${detail.display_id}.md`,note.draft.body_md+'\n\n```'+note.draft.language+'\n'+note.draft.code_text+'\n```')
-    await note.reloadServer()
+    downloadText(`未保存草稿-${detail.display_id}.md`,note.draft.body_md+'\n\n```'+code.draft.language+'\n'+code.draft.code_text+'\n```')
+    await note.reloadServer();await code.reloadServer()
   }
   const upstreamQuestion={id:0,displayId:detail.display_id,title:detail.title,level:detail.difficulty,date:'',frequency:0,rate:0 as const,done:false,slug:detail.url??'',expandedLink:true}
   return <>
@@ -61,9 +64,9 @@ function DetailContent({detail,onClose}:{detail:Detail;onClose:()=>void}){
       <h3>练习历史 <small>{attempts.length}</small></h3><div className="attempt-list">{attempts.length===0?<p className="muted">还没有练习记录</p>:attempts.map(a=><div key={a.id}><span>{outcomes[a.outcome]??a.outcome}</span><small>{new Date(a.practiced_at).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})}{a.duration_seconds!==null?` · ${a.duration_seconds/60} 分钟`:''}</small></div>)}</div>
     </aside></div>
     {error&&<div className="local-error" role="alert">{error}</div>}
-    <footer className="note-save-bar"><span className={note.error?'error-text':'muted'} role="status">笔记：{note.status}{note.error?' · '+note.error:''}</span>{note.error&&<button onClick={()=>void note.flush()}>重新保存</button>}<button onClick={()=>downloadText(`笔记-${detail.display_id}.md`,note.draft.body_md+'\n\n```'+note.draft.language+'\n'+note.draft.code_text+'\n```')}><Download size={14}/>导出草稿</button></footer>
-    {note.error&&<div className="button-row"><button onClick={()=>void recover()}>导出当前草稿并载入服务器版本</button><span className="muted small">{note.conflict?'检测到版本冲突，服务器内容不会被自动覆盖。':'连接恢复后可以重试保存，或导出草稿后重新载入。'}</span></div>}
-    <div ref={acmAnchor}><EditorBoundary onClose={()=>acmAnchor.current?.scrollIntoView()}><Suspense fallback={<p>正在载入 ACM 编辑器…</p>}><AcmWorkspace problemId={detail.id} code={note.draft.code_text} language={note.draft.language} onCodeChange={code_text=>note.setDraft({code_text})} onLanguageChange={language=>note.setDraft({language})} onRewrite={note.rewriteCode} changingCode={note.changingCode} registerGuard={registerAcmGuard}/></Suspense></EditorBoundary></div>
+    <footer className="note-save-bar"><span className={note.error?'error-text':'muted'} role="status">代码：{code.status} · 笔记：{note.status}{note.error?' · '+note.error:''}</span>{note.error&&<button onClick={()=>void note.flush()}>重新保存</button>}<button onClick={()=>downloadText(`笔记-${detail.display_id}.md`,note.draft.body_md+'\n\n```'+code.draft.language+'\n'+code.draft.code_text+'\n```')}><Download size={14}/>导出草稿</button></footer>
+    {(note.error||code.error)&&<div className="button-row"><span role="alert">{code.error}</span><button onClick={()=>void recover()}>导出当前草稿并载入服务器版本</button><span className="muted small">{note.conflict?'检测到版本冲突，服务器内容不会被自动覆盖。':'连接恢复后可以重试保存，或导出草稿后重新载入。'}</span></div>}
+    <div ref={acmAnchor}><EditorBoundary onClose={()=>acmAnchor.current?.scrollIntoView()}><Suspense fallback={<p>正在载入 ACM 编辑器…</p>}><AcmWorkspace problemId={detail.id} code={code.draft.code_text} language={code.draft.language} onCodeChange={code.setCode} onLanguageChange={language=>{void code.switchLanguage(language)}} onRewrite={code.rewriteCode} changingCode={code.changing} registerGuard={registerAcmGuard} beforeRun={code.flush}/></Suspense></EditorBoundary></div>
     {editor&&<div className="upstream-editor-wrap"><div className="editor-save-indicator" role="status">{note.status}{note.error?' · '+note.error:''}</div><EditorBoundary onClose={()=>setEditor(false)}><Suspense fallback={<p>载入编辑器…</p>}><NoteEditor question={upstreamQuestion} value={note.draft.body_md} note={{content:note.draft.body_md,updatedAt:note.draft.updated_at}} onChange={body_md=>note.setDraft({body_md})} onClose={()=>setEditor(false)} onExport={()=>downloadText(`笔记-${detail.display_id}.md`,note.draft.body_md)}/></Suspense></EditorBoundary></div>}
   </>
 }

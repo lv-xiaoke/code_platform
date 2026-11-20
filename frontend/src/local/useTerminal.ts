@@ -1,14 +1,14 @@
 import {useCallback,useEffect,useRef,useState} from 'react'
 import {useQuery,useQueryClient} from '@tanstack/react-query'
 import {api} from './api'
-import {prepareTerminalInput,terminalActive,type TerminalInputRequest,type TerminalState} from './terminalTypes'
+import {prepareTerminalInput,prepareTerminalStart,terminalActive,type TerminalStartBody,type TerminalInputRequest,type TerminalState} from './terminalTypes'
 
 export function useTerminal(problemId:string){
   const qc=useQueryClient()
   const [id,setId]=useState<string|null>(null),[starting,setStarting]=useState(false),[sending,setSending]=useState(false),[error,setError]=useState('')
   const requestKey=useRef<string|null>(null)
   const ownedRequests=useRef(new Set<string>())
-  const startBody=useRef<{request_id:string;source_code:string}|null>(null)
+  const startBody=useRef<TerminalStartBody|null>(null)
   const startPromise=useRef<Promise<void>|null>(null)
   const pendingInput=useRef<TerminalInputRequest|null>(null),inputLock=useRef(false)
   const state=useQuery({queryKey:['terminal',id],queryFn:()=>api<TerminalState>('/terminals/'+id),enabled:!!id,
@@ -18,10 +18,10 @@ export function useTerminal(problemId:string){
     await qc.cancelQueries({queryKey:['terminal',value.id],exact:true})
     qc.setQueryData(['terminal',value.id],value)
   },[qc])
-  const start=useCallback((source:string)=>{
+  const start=useCallback((source:string,language='python')=>{
     if(startPromise.current)return startPromise.current
     const previous=startBody.current
-    const body=previous?.source_code===source?previous:{request_id:crypto.randomUUID(),source_code:source}
+    const body=prepareTerminalStart(previous,source,language)
     startBody.current=body;requestKey.current=body.request_id
     setStarting(true);setError('');pendingInput.current=null
     const promise=(async()=>{

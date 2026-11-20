@@ -11,7 +11,7 @@ test('changing saved tests starts a fresh retry identity without sending client 
   const first=prepareRun('print(1)','suite',suite)
   const next=prepareRun('print(1)','suite',{...suite,revision:2,cases:[{...draft,stdin:'b'}]})
   assert.notEqual(first.signature,next.signature)
-  assert.deepEqual(next.submission,{source_code:'print(1)',mode:'suite'})
+  assert.deepEqual(next.submission,{source_code:'print(1)',language:'python',mode:'suite'})
 })
 test('custom runs use the current scratch input',()=>{
   const first=prepareRun('print(1)','custom',suite)

@@ -48,3 +48,9 @@ test('sending retains keyboard focus by making input readonly instead of disable
   assert.match(html,/<textarea[^>]*readonly/i)
   assert.doesNotMatch(html,/<textarea[^>]*disabled/)
 })
+test('compiling remains stoppable and does not offer stdin before ready',()=>{
+  const html=render({...active,status:'compiling',language:'java',runtime_version:'21'})
+  assert.match(html,/编译中/)
+  assert.match(html,/停止/)
+  assert.match(html,/<textarea[^>]*disabled/)
+})
