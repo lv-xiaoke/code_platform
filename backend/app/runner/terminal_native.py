@@ -10,7 +10,7 @@ class NativeTerminalRunner(NativeRunner):
         self.register(session.stop_event)
         try:
             script = self.directory(session.id, session.source_code)
-            session.emit({'type': 'ready', 'python_version': self.image_ref.split('@')[1].removesuffix('-windows-x64')})
+            session.emit({'type': 'ready', 'python_version': self.python_version})
             result = execute_process(self.python, script, inputs=session.inputs, stop_event=session.stop_event,
                                      on_output=lambda name, text: session.emit({'type': name, 'text': text}), wall_seconds=300)
             return {key: value for key, value in result.items() if key not in ('stdout', 'stderr')}

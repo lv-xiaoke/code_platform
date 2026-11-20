@@ -38,6 +38,8 @@ AI 截图用于展示交互效果；实际回答需要自行配置 Key 并联网
 2. 双击安装包，按向导完成安装。
 3. 双击桌面的 **CodeTop 刷题**，即可开始使用。
 
+macOS 免费测试版见 [Mac 测试版下载](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)：M 系列选择 `arm64-unsigned.dmg`，Intel 选择 `x86_64-unsigned.dmg`。测试版未经过 Apple 公证，首次打开可能被 macOS 拦截；安装说明见[macOS 使用与构建](docs/deployment.md#macos-构建与使用)，自动验证范围见[验收记录](docs/macos-validation.md)。
+
 ## 数据、备份与更新
 
 学习数据库、笔记、代码历史和自动备份保存在项目目录的 `data/` 中。初始化重复执行会保留已有学习数据。安装目录内会持续产生数据，请放在可写的本地目录。

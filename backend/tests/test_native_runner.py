@@ -1,4 +1,5 @@
 import os
+import sys
 import queue
 import threading
 import time
@@ -6,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-pytestmark = pytest.mark.skipif(os.name != 'nt', reason='Windows native execution')
+pytestmark = pytest.mark.skipif(sys.platform not in ('win32', 'darwin'), reason='supported native execution platforms')
 
 
 def run_case(tmp_path, source, stdin='', expected=None):
@@ -78,6 +79,7 @@ def test_native_health_never_invokes_docker(tmp_path, monkeypatch):
     assert run_case(tmp_path, 'print(123)', expected='123\n')['status'] == 'passed'
 
 
+@pytest.mark.skipif(os.name != 'nt', reason='Windows Job Object handle assertion')
 def test_descendant_is_reaped_after_normal_parent_exit(tmp_path):
     import ctypes
     from pathlib import Path

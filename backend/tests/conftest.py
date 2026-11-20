@@ -8,6 +8,17 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 
 
+@pytest.fixture(autouse=True)
+def isolated_macos_credentials(monkeypatch, request):
+    # Business tests must never touch a developer's real Keychain.
+    import sys
+    if sys.platform == 'darwin' and request.node.path.name != 'test_keystore.py':
+        from app.ai.secrets import KeyStore
+        values = {}
+        monkeypatch.setattr(KeyStore, 'read', lambda self: values.get(self.account, ''))
+        monkeypatch.setattr(KeyStore, 'write', lambda self, key: values.__setitem__(self.account, key))
+
+
 @pytest.fixture
 def tmp_path():
     # Retain test artifacts; pytest's default retention cleanup bulk-deletes.

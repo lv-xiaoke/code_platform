@@ -6,6 +6,7 @@ import threading
 from uuid import UUID
 
 from ..paths import native_python, verify_bundled_runtime
+from .. import platforms
 from .comparison import compare_output
 
 
@@ -16,7 +17,9 @@ class NativeRunner:
         self.artifact_root = Path(artifact_root).resolve()
         self.artifact_root.mkdir(parents=True, exist_ok=True)
         self.python = native_python()
-        self.image_ref = 'local-python@3.12-windows-x64'
+        suffix = 'macos-' + platforms.architecture() if platforms.system_name() == 'macos' else 'windows-x64'
+        self.image_ref = 'local-python@3.12-' + suffix
+        self.python_version = '3.12'
         self.lock = threading.Lock()
         self.active = set()
         self.closed = False
@@ -24,20 +27,23 @@ class NativeRunner:
 
     def health(self):
         try:
-            if os.name != 'nt' or not self.python.is_file():
-                raise ValueError('内置 Windows Python 不存在，请重新安装完整桌面版')
+            if platforms.system_name() not in ('windows', 'macos') or not self.python.is_file():
+                raise ValueError('内置 Python 不存在或此系统暂不支持，请重新安装完整桌面版')
             if not self.verified:
                 verify_bundled_runtime()
                 self.verified = True
-            result = subprocess.run([str(self.python), '-I', '-S', '-X', 'utf8', '-c',
+            result = subprocess.run([str(self.python), '-I', '-S', '-B', '-X', 'utf8', '-c',
                                      'import json,sys; print(json.dumps(sys.version_info[:3]))'],
-                                    capture_output=True, timeout=5, creationflags=0x08000000)
+                                    capture_output=True, timeout=5, **platforms.background_options())
             version = json.loads(result.stdout)
             if result.returncode or version[:2] != [3, 12]:
                 raise ValueError('本机运行需要随程序提供的 Python 3.12')
-            self.image_ref = 'local-python@' + '.'.join(map(str, version)) + '-windows-x64'
+            self.python_version = '.'.join(map(str, version))
+            suffix = 'windows-x64' if platforms.system_name() == 'windows' else 'macos-' + platforms.architecture()
+            self.image_ref = 'local-python@' + self.python_version + '-' + suffix
             return {'available': True, 'kind': self.kind, 'label': '本机 Python', 'image_ref': self.image_ref,
-                    'python_series': '3.12', 'limits': {'case_timeout_seconds': 2, 'memory_mb': 256, 'output_limit_bytes': 65536}}
+                    'python_series': '3.12', 'limits': {'case_timeout_seconds': 2, 'memory_mb': 256, 'output_limit_bytes': 65536,
+                    'memory_enforcement': 'rss-monitor' if platforms.system_name() == 'macos' else 'job-object'}}
         except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
             return {'available': False, 'kind': self.kind, 'label': '本机 Python', 'image_ref': self.image_ref,
                     'python_series': '3.12', 'error': str(exc), 'limits': {}}
@@ -82,7 +88,7 @@ class NativeRunner:
                 if result['status'] == 'executed' and case.get('expected_stdout') is not None:
                     result['status'] = 'passed' if compare_output(result['stdout'], case['expected_stdout'], case.get('comparison', 'tokens')) else 'wrong_answer'
                 results.append({**case, **result})
-            return {'results': results, 'python_version': self.image_ref.split('@')[1].removesuffix('-windows-x64')}
+            return {'results': results, 'python_version': self.python_version}
         finally:
             with self.lock:
                 self.active.discard(event)

@@ -1,7 +1,5 @@
 """Frozen desktop entry: no shell, PATH dependency, or user setup commands."""
 import argparse
-import ctypes
-from ctypes import wintypes
 import json
 import logging
 import os
@@ -11,11 +9,11 @@ import subprocess
 import sys
 import time
 import urllib.request
-import webbrowser
 from contextlib import contextmanager
 
 from .paths import application_root, default_data_dir
 from .runtime import RuntimeLock
+from . import platforms
 
 
 def health(port):
@@ -40,6 +38,10 @@ def matches(value, data):
 def free_port(preferred):
     for port in (preferred, 0):
         with socket.socket() as sock:
+            if platforms.system_name() == 'macos':
+                # Match Uvicorn's POSIX listener: the old service's TIME_WAIT
+                # sockets must not force restore onto a different browser URL.
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 sock.bind(('127.0.0.1', port))
                 return sock.getsockname()[1]
@@ -81,7 +83,7 @@ def launch(data, preferred=8000, browser=True):
             try:
                 if matches(health(port), data):
                     if browser:
-                        webbrowser.open(f'http://127.0.0.1:{port}/')
+                        platforms.open_browser(f'http://127.0.0.1:{port}/')
                     return port
             except (OSError, ValueError):
                 pass
@@ -94,7 +96,7 @@ def launch(data, preferred=8000, browser=True):
                 args = [sys.executable, '--serve', '--data-dir', str(data), '--port', str(port)]
                 if not getattr(sys, 'frozen', False):
                     args[1:1] = ['-m', 'app.desktop']
-                process = subprocess.Popen(args, stdout=log, stderr=log, creationflags=0x08000000)
+                process = subprocess.Popen(args, stdout=log, stderr=log, **platforms.background_options())
             deadline = time.monotonic() + 60
             while time.monotonic() < deadline and process.poll() is None:
                 try:
@@ -104,7 +106,7 @@ def launch(data, preferred=8000, browser=True):
                         pending.write_text(json.dumps({'port': port, 'pid': process.pid}), encoding='utf-8')
                         pending.replace(marker)
                         if browser:
-                            webbrowser.open(f'http://127.0.0.1:{port}/')
+                            platforms.open_browser(f'http://127.0.0.1:{port}/')
                         return port
                 except (OSError, ValueError):
                     pass
@@ -126,25 +128,29 @@ def serve(data, port):
     app.state.browser_tabs = tabs
     server = BrowserServer(uvicorn.Config(app, host='127.0.0.1', port=port, ws='websockets-sansio', access_log=False), tabs)
     app.state.desktop_server, app.state.desktop_port = server, port
-    asyncio.run(server.serve(), loop_factory=asyncio.SelectorEventLoop)
+    if platforms.system_name() == 'windows':
+        asyncio.run(server.serve(), loop_factory=asyncio.SelectorEventLoop)
+    else:
+        asyncio.run(server.serve())
 
 
-def wait_parent(pid, timeout=60):
-    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-    kernel.OpenProcess.restype = wintypes.HANDLE
-    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
-    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
-    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-    handle = kernel.OpenProcess(0x100000, False, pid)
-    if handle:
+def wait_parent(pid, timeout=60, identity=None):
+    platforms.wait_for_process(pid, identity, timeout)
+
+
+def wait_data_unlock(data, timeout=60):
+    deadline = time.monotonic() + timeout
+    while True:
         try:
-            if kernel.WaitForSingleObject(handle, timeout * 1000) == 258:
-                raise RuntimeError('服务未退出，取消恢复；原数据保留')
-        finally:
-            kernel.CloseHandle(handle)
+            with RuntimeLock(data):
+                return
+        except ValueError:
+            if time.monotonic() >= deadline:
+                raise RuntimeError('数据仍在使用，取消恢复；原数据保留') from None
+            time.sleep(.05)
 
 
-def restore(data, ticket, parent, port, attempt):
+def restore(data, ticket, parent, port, attempt, parent_identity=None):
     from .desktop_restore import ticket_path, write_status
     from .backups import restore_backup
     stage = ticket_path(data, ticket)
@@ -164,7 +170,8 @@ def restore(data, ticket, parent, port, attempt):
         time.sleep(.05)
     value = json.loads(status.read_text())
     try:
-        wait_parent(parent)
+        wait_parent(parent, identity=parent_identity)
+        wait_data_unlock(data)
         restore_backup(stage / 'backup.zip', data)
         value.update(state='completed', error=None)
     except Exception as exc:
@@ -178,6 +185,7 @@ def main():
     parser.add_argument('--serve', action='store_true')
     parser.add_argument('--restore')
     parser.add_argument('--parent-pid', type=int)
+    parser.add_argument('--parent-identity')
     parser.add_argument('--attempt')
     parser.add_argument('--data-dir', type=Path)
     parser.add_argument('--port', type=int, default=8000)
@@ -194,7 +202,7 @@ def main():
     if args.serve:
         serve(data, args.port)
     elif args.restore:
-        restore(data, args.restore, args.parent_pid, args.port, args.attempt)
+        restore(data, args.restore, args.parent_pid, args.port, args.attempt, args.parent_identity)
     else:
         launch(data, args.port, browser=not args.no_browser)
 
@@ -204,7 +212,7 @@ def entry():
         main()
     except Exception as exc:
         if getattr(sys, 'frozen', False) and '--serve' not in sys.argv and '--restore' not in sys.argv:
-            ctypes.windll.user32.MessageBoxW(None, str(exc), 'CodeTop 启动失败', 0x10)
+            platforms.show_error(str(exc))
         else:
             raise
 

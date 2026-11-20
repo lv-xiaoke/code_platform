@@ -1,0 +1,13 @@
+{
+  "python_version": "3.12.13",
+  "release": "20260623",
+  "provenance": "https://github.com/astral-sh/python-build-standalone/releases/expanded_assets/20260623",
+  "arm64": {
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260623/cpython-3.12.13+20260623-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "41df7d3ae4757e84b97874f76d634268456aaa271740d33f968d826374998fb7"
+  },
+  "x86_64": {
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260623/cpython-3.12.13+20260623-x86_64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "a6bbea996c5f14eb55ab275889d2df45408deec504b4a7219d7b59c045b2555e"
+  }
+}

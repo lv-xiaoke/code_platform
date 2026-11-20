@@ -5,6 +5,8 @@ import sys
 
 
 def test_desktop_paths_do_not_depend_on_working_directory(tmp_path, monkeypatch):
+    from app import platforms
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'windows')
     from app.paths import application_root, default_data_dir, native_python
     installed = tmp_path / '安装 with spaces'
     installed.mkdir()
@@ -19,6 +21,8 @@ def test_desktop_paths_do_not_depend_on_working_directory(tmp_path, monkeypatch)
 
 
 def test_bundled_runtime_rejects_tampered_files(tmp_path, monkeypatch):
+    from app import platforms
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'windows')
     import hashlib
     import pytest
     from app.paths import verify_bundled_runtime

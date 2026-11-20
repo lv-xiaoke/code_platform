@@ -1,5 +1,7 @@
 # CodeTop Local
 
+macOS：[免费测试版下载](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)提供 M 系列和 Intel 安装包，未经过 Apple 公证。安装与构建见[部署说明](deployment.md#macos-构建与使用)，自动测试与待人工验证项目见[验收记录](macos-validation.md)。源码模式可通过 `bash scripts/start-macos.sh` 启动，`--no-browser` 常驻；完整应用通过 Finder 双击启动，学习数据位于用户 Application Support 目录。
+
 简洁的本机高频刷题题单：筛选题目、本地读题与 Python ACM 练习、标记进度、记录笔记。当前应用版本 **1.6.0**，数据库结构为 **0003**。完整桌面版内置本机 Python，无需 Docker；本文中容器准备与隔离说明仅适用于显式 Docker 模式。
 
 文中命令默认在你自己的项目根目录运行。首次安装和故障处理见[部署说明](deployment.md)。

@@ -1,5 +1,59 @@
 # 安装、部署与常见问题
 
+## macOS 构建与使用
+
+免费测试版下载见 [v1.6.0-macos-test.1](https://github.com/lv-xiaoke/code_platform/releases/tag/v1.6.0-macos-test.1)。M 系列下载 `arm64-unsigned.dmg`，Intel 下载 `x86_64-unsigned.dmg`，打开 DMG 后将 CodeTop.app 拖入 Applications。M 系列在 macOS 15.8.2、Intel 在 macOS 15.7.9 的 GitHub 环境完成构建及应用内自动验证。
+
+测试版未使用付费 Developer ID、未经过 Apple 公证，首次打开可能被系统拦截。请核对下载来源及 SHA-256，并参考 [Apple 官方安全打开 App 的说明](https://support.apple.com/zh-cn/102445)。用户无需开通 Apple 开发者账号。Finder、浏览器界面及干净电脑安装仍需实机反馈；macOS 13 只是构建目标，尚未在该系统版本验收。执行记录见 [macOS 验收](macos-validation.md)。
+
+### 从源码启动（Mac）
+
+维护者需要 Python 3.12.13、Node 24.10.0、Bun 1.3.5；普通用户使用未来的完整应用时无需这些工具。在项目根目录执行：
+
+```bash
+python3.12 -m venv backend/.venv
+backend/.venv/bin/python -m pip install -r backend/requirements.lock.txt
+(cd frontend && bun install --frozen-lockfile)
+backend/.venv/bin/python scripts/build_frontend.py --node "$(command -v node)"
+bash scripts/start-macos.sh
+```
+
+默认打开浏览器并在最后一个 CodeTop 标签关闭后退出服务；`bash scripts/start-macos.sh --no-browser` 常驻运行。源码数据默认保存在项目 `data/`，可用 CODETOP_DATA_DIR 指定独立目录。
+
+### 构建 CodeTop.app 和测试 DMG
+
+在对应架构的 Mac 上执行，不能在 Windows 交叉打包。运行时来自固定的 [python-build-standalone 20260623 发布](https://github.com/astral-sh/python-build-standalone/releases/tag/20260623)，下载 URL 和 SHA-256 记录在 `packaging/macos-python-sources.json`，不自动选择 latest。获取与打包使用分离的环境，不向内置解释器安装用户依赖：
+
+```bash
+python_root="$(python3.12 scripts/fetch_macos_python.py --arch arm64)"
+"$python_root/bin/python3" -m venv runtime/macos-build-env
+runtime/macos-build-env/bin/python -m pip install -r packaging/build-requirements.lock.txt
+runtime/macos-build-env/bin/python scripts/build_macos.py --python-root "$python_root" --arch arm64
+```
+
+Intel 将两处 `arm64` 改为 `x86_64`。构建前需要按上节安装前端依赖并生成 release。已有构建环境目录时换用一个新名称，不删除或覆盖旧目录。也可设置 CODETOP_BUILD_PYTHON 后通过 `bash scripts/build-macos.sh` 传入同样参数。
+
+输出写入新的 `runtime/macos-build-*` 和 `dist/macos-*`；无证书参数的包以 `-unsigned.dmg` 命名，仅用于维护者测试。Apple Silicon 必需的 ad hoc 签名不等于 Developer ID 签名或 Apple 公证。测试包可能被 Gatekeeper 阻止，不要求用户关闭系统防护来运行。
+
+正式分发需事先在 Mac 构建环境配置 Developer ID 和 notarytool 钥匙串配置，然后增加：
+
+```bash
+runtime/macos-build-env/bin/python scripts/build_macos.py \
+  --python-root "$python_root" --arch arm64 \
+  --identity 'Developer ID Application: YOUR NAME (TEAMID)' \
+  --notary-profile 'codetop-notary'
+```
+
+脚本会由内到外签名、生成签名后运行时哈希、公证应用与 DMG、附加票据并输出校验文件；失败时不标记正式发布成功。证书、私钥和 Apple 凭据不得加入仓库。本仓库的 Mac CI 只生成测试 artifact，正式签名使用上述显式命令，不自动发布 Release。
+
+### 数据和运行限制
+
+完整 Mac 应用的数据、备份和日志位于 `~/Library/Application Support/CodeTopLocal/`，升级应用文件不覆盖学习数据。AI Key 保存在系统钥匙串，不随学习备份迁移；不同数据目录分别关联凭据。钥匙串拒绝访问时不会降级为明文文件。
+
+Windows/Mac 使用相同的学习备份格式；恢复后重新配置 AI Key。本机练习可以访问当前用户文件和网络。Mac 使用进程组管理及 RSS 采样监测，256 MiB 是监测阈值，可能短暂超出，与 Windows Job Object 硬限制不同；本机模式不提供恶意代码隔离。普通样例 2 秒墙钟、交互模式 300 秒墙钟，CPU 预算 3 秒，输入与输出各 64 KiB。需要原有 Docker 模式的用户仍可显式设置 CODETOP_RUNNER=docker。
+
+---
+
 CodeTop Local 当前验证目标是 Windows 10 / 11 x64 的个人本机使用。建议将目录放在可写的本地磁盘，例如 `D:\Apps\CodeTop-Local`。支持中文和空格路径；不要直接在 ZIP 内启动，也不要复制另一台机器的 `.venv` 使用。
 
 ## 安装前需要什么
