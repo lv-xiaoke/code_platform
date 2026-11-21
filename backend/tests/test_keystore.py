@@ -1,3 +1,4 @@
+import os
 import pytest
 
 
@@ -35,3 +36,21 @@ def test_denied_keychain_never_falls_back_or_echoes_key(tmp_path, monkeypatch):
         store.write('sk-never-echo-this')
     assert 'sk-never-echo-this' not in str(exc.value)
     assert not list(tmp_path.rglob('*'))
+
+
+@pytest.mark.skipif(os.name == 'nt', reason='POSIX credential file backend')
+def test_posix_credentials_use_user_only_file(tmp_path, monkeypatch):
+    from app import platforms
+    from app.ai import secrets
+    monkeypatch.setattr(platforms, 'system_name', lambda: 'unsupported')
+    monkeypatch.delenv('DEEPSEEK_API_KEY', raising=False)
+    store = secrets.KeyStore(tmp_path)
+    assert store.read() == ''
+    store.write('sk-unit-test')
+    assert store.read() == 'sk-unit-test'
+    path = tmp_path/'ai-key.local'
+    assert (path.stat().st_mode & 0o777) == 0o600
+    assert not (tmp_path/'ai-key.dpapi').exists()
+    monkeypatch.setenv('DEEPSEEK_API_KEY', 'environment-key')
+    assert store.read() == 'sk-unit-test'
+    assert secrets.KeyStore(tmp_path/'fresh').read() == 'environment-key'

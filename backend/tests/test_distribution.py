@@ -106,6 +106,7 @@ def source(tmp_path):
         'releases/test-build/assets/app.js': 'console.log(1)',
         'releases/old/index.html': 'old build',
         'data/study.sqlite3': 'PRIVATE', 'data/ai-key.dpapi': 'SECRET',
+        'data/ai-key.local': 'SECRET',
         'runtime/server.log': 'PRIVATE', 'backend/.venv/secret.py': 'PRIVATE',
         'frontend/.env': 'SECRET', 'tools/node_modules/private.js': 'PRIVATE',
         'releases/test-build/.env': 'SECRET',
