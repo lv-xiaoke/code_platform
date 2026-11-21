@@ -166,7 +166,7 @@
       "deepseek-flash",
       "deepseek-v4-pro"
     ],
-    "key_storage": "Windows DPAPI; excluded from SQLite and backups",
+    "key_storage": "Windows DPAPI; macOS Keychain; other systems a 0600 user-only file; excluded from SQLite and backups",
     "max_active": 2,
     "max_output_tokens": 4096
   }

@@ -28,6 +28,7 @@ def test_desktop_assets_exclude_personal_files_and_old_builds(tmp_path, monkeypa
         'releases/current-build/assets/app.js': 'ok',
         'releases/old/index.html': 'PRIVATE', 'data/study.sqlite3': 'PRIVATE',
         'data/native-consent.json': 'PRIVATE', 'data/ai-key.dpapi': 'PRIVATE',
+        'data/ai-key.local': 'PRIVATE',
         'frontend/.env': 'PRIVATE', 'runtime/secret.txt': 'PRIVATE',
         'backend/.venv/private.py': 'PRIVATE',
     }

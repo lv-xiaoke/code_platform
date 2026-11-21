@@ -144,7 +144,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-runner.p
 
 打开页面设置或练习面板中的“AI 设置”，输入自己的 DeepSeek Key，保存并测试连接。AI 调用需要联网，发送所选题面、代码和问题等上下文。界面模型能否使用以自己的 DeepSeek 账户为准。
 
-Windows 的 Key 使用 DPAPI 加密，保存为当前数据目录下的 `ai-key.dpapi`：完整安装包位于 `%LOCALAPPDATA%\CodeTopLocal`，源码默认位于项目 `data/`。Mac 使用系统钥匙串，不生成 DPAPI 文件。Key 均不包含在学习备份中；换电脑或更换数据目录后重新配置。不要把整个数据目录作为软件包分享。
+Windows 的 Key 使用 DPAPI 加密，保存为当前数据目录下的 `ai-key.dpapi`：完整安装包位于 `%LOCALAPPDATA%\CodeTopLocal`，源码默认位于项目 `data/`。Mac 使用系统钥匙串，不生成 DPAPI 文件。其他系统（如 Linux 源码运行）保存为仅当前用户可读（0600）的 `ai-key.local`。Key 均不包含在学习备份中；换电脑或更换数据目录后重新配置。不要把整个数据目录作为软件包分享。
 
 ## 启动、退出和端口
 
